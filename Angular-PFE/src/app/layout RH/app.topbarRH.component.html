@@ -1,0 +1,160 @@
+<div class="layout-topbar">
+  <a class="layout-topbar-logo" routerLink="">
+    <img src="assets/layout/images/{{layoutService.config.colorScheme === 'light' ? 'logo-dark' : 'logo-white'}}.svg"
+      alt="logo">
+    <span>RH</span>
+  </a>
+
+  <button #menubutton class="p-link layout-menu-button layout-topbar-button" (click)="layoutService.onMenuToggle()">
+    <i class="pi pi-bars"></i>
+  </button>
+
+  <button #topbarmenubutton class="p-link layout-topbar-menu-button layout-topbar-button"
+    (click)="layoutService.showProfileSidebar()">
+    <i class="pi pi-ellipsis-v"></i>
+  </button>
+  <div class="layout-mask"></div>
+  <div #topbarmenu class="layout-topbar-menu"
+    [ngClass]="{'layout-topbar-menu-mobile-active': layoutService.state.profileSidebarVisible}">
+    <div class="flex flex-wrap align-items-center">
+      <i class="pi pi-bell mr-4" pBadge [value]="newNotificationCount" style="font-size: 1.5rem" (click)="showNotificationPanel($event)"></i>
+      <p-chip label="{{name}}"
+        image="https://static.vecteezy.com/system/resources/previews/000/566/937/original/vector-person-icon.jpg"></p-chip>
+    </div>
+  </div>
+
+  <p-overlayPanel #notificationPanel [dismissable]="true"  [style]="{ 'max-height': '600px', 'overflow-y': 'auto' }">
+
+    <p-multiSelect [options]="notificationTypes" [(ngModel)]="selectedNotificationTypes" placeholder="Sélectionner un type de notification" optionLabel="label" class="multiselect-custom" (onChange)="onMultiSelectChange($event)">
+</p-multiSelect>
+  <br>
+  <div class="card">
+    <span class="block text-bluegray-600 font-medium mb-3">Aujourd'hui</span>
+    <ul class="p-0 m-0 list-none">
+      <ng-container *ngFor="let notificationGroup of filteredNotifications">
+        <ng-container *ngIf="isTodayOrYesterday(notificationGroup.date) == 'Aujourd\'hui'">
+          <ng-container *ngFor="let notification of notificationGroup.notifications">
+
+            <ng-container *ngIf="notification.notification === 'Congé'">
+              <a [routerLink]="['/RH/conge']">
+                <li class="notification-item" [style.background-color]="notification.lu ? '' : '#f0f0f0'">
+                  <div class="notification-details">
+                    <h5>{{ notification.note }}</h5>
+                    <ul style="list-style-type:square;">
+                      <li><strong>Type:</strong> {{ notification.conge_id.type_conge.type_nom_conge }}</li>
+                      <li><strong>Date de début:</strong> {{ notification.conge_id.date_debut_conge }}</li>
+                      <li><strong>Date de reprise:</strong> {{notification.conge_id.date_fin_conge}}</li>
+                      <li *ngIf="notification.etat == 'refusé'"><strong>Cause : </strong>{{notification.conge_id.cause}}</li>
+                      <li><strong>Durée:</strong> {{ notification.conge_id.duree }} Jours</li>
+                    </ul>
+                  </div>
+                </li>
+              </a>
+            </ng-container>
+
+            <ng-container *ngIf="notification.notification === 'Autorisation'">
+              <a [routerLink]="['/RH/autorisation']">
+                <li class="notification-item" [style.background-color]="notification.lu ? '' : '#f0f0f0'">
+                  <div class="notification-details">
+                    <h5>{{ notification.note }}</h5>
+                    <ul style="list-style-type:square;">
+                      <li><strong>Date de sortie:</strong> {{ notification.autorisation_id.Date_sortie }}</li>
+                      <li><strong>Heure de début:</strong> {{ formatTime(notification.autorisation_id.Heure_debut) }}</li>
+                      <li><strong>Heure de fin:</strong> {{ formatTime(notification.autorisation_id.Heure_fin) }}</li>
+                      <li><strong>Durée:</strong> {{ formatDuree(notification.autorisation_id.Duree) }} </li>
+                    </ul>
+                  </div>
+                </li>
+              </a>
+            </ng-container>
+
+            <ng-container *ngIf="notification.notification === 'Ordre de mission'">
+              <a [routerLink]="['/RH/Ordre_de_mission']">
+                <li class="notification-item" [style.background-color]="notification.lu ? '' : '#f0f0f0'">
+                  <div class="notification-details">
+                    <h5>{{ notification.note }}</h5>
+                    <ul style="list-style-type:square;">
+                      <li><strong>Date de sortie:</strong> {{ notification.ordre_de_mission_id.Date_sortie }}</li>
+                      <li><strong>Date de retour:</strong> {{ notification.ordre_de_mission_id.Date_retour }}</li>
+                      <li><strong>Voiture:</strong> {{ notification.ordre_de_mission_id.voiture.nom_voiture}}</li>
+                      <li><strong>Ville de départ :</strong> {{ notification.ordre_de_mission_id.ville.nom_ville }} </li>
+                      <li><strong>Ville de destination :</strong> {{ notification.ordre_de_mission_id.Ville_destination.nom_ville }} </li>
+                    </ul>
+                  </div>
+                </li>
+              </a>
+            </ng-container>
+
+
+            <li class="flex align-items-center py-2 border-bottom-1 surface-border"></li>
+          </ng-container>
+        </ng-container>
+      </ng-container>
+    </ul>
+
+    <span class="block text-bluegray-600 font-medium mb-3">Hier</span>
+    <ul class="p-0 m-0 list-none">
+      <ng-container *ngFor="let notificationGroup of filteredNotifications">
+        <ng-container *ngIf="isTodayOrYesterday(notificationGroup.date) == 'Hier'">
+          <ng-container *ngFor="let notification of notificationGroup.notifications">
+
+            <ng-container *ngIf="notification.notification === 'Congé'">
+              <a [routerLink]="['/RH/conge']">
+                <li class="notification-item" [style.background-color]="notification.lu ? '' : '#f0f0f0'">
+                  <div class="notification-details">
+                    <h5>{{ notification.note }}</h5>
+                    <ul style="list-style-type:square;">
+                      <li><strong>Type:</strong> {{ notification.conge_id.type_conge.type_nom_conge }}</li>
+                      <li><strong>Date de début:</strong> {{ notification.conge_id.date_debut_conge }}</li>
+                      <li><strong>Date de reprise:</strong> {{notification.conge_id.date_fin_conge}}</li>
+                      <li *ngIf="notification.etat == 'refusé'"><strong>Cause : </strong>{{notification.conge_id.cause}}</li>
+                      <li><strong>Durée:</strong> {{ notification.conge_id.duree }} Jours</li>
+                    </ul>
+                  </div>
+                </li>
+              </a>
+            </ng-container>
+
+            <ng-container *ngIf="notification.notification === 'Autorisation'">
+              <a [routerLink]="['/RH/autorisation']">
+                <li class="notification-item" [style.background-color]="notification.lu ? '' : '#f0f0f0'">
+                  <div class="notification-details">
+                    <h5>{{ notification.note }}</h5>
+                    <ul style="list-style-type:square;">
+                      <li><strong>Date de sortie:</strong> {{ notification.autorisation_id.Date_sortie }}</li>
+                      <li><strong>Heure de début:</strong> {{ formatTime(notification.autorisation_id.Heure_debut) }}</li>
+                      <li><strong>Heure de fin:</strong> {{ formatTime(notification.autorisation_id.Heure_fin) }}</li>
+                      <li><strong>Durée:</strong> {{ formatDuree(notification.autorisation_id.Duree) }} </li>
+                    </ul>
+                  </div>
+                </li>
+              </a>
+            </ng-container>
+
+            <ng-container *ngIf="notification.notification === 'Ordre de mission'">
+              <a [routerLink]="['/RH/Ordre_de_mission']">
+                <li class="notification-item" [style.background-color]="notification.lu ? '' : '#f0f0f0'">
+                  <div class="notification-details">
+                    <h5>{{ notification.note }}</h5>
+                    <ul style="list-style-type:square;">
+                      <li><strong>Date de sortie:</strong> {{ notification.ordre_de_mission_id.Date_sortie }}</li>
+                      <li><strong>Date de retour:</strong> {{ notification.ordre_de_mission_id.Date_retour }}</li>
+                      <li><strong>Voiture:</strong> {{ notification.ordre_de_mission_id.voiture.nom_voiture}}</li>
+                      <li><strong>Ville de départ :</strong> {{ notification.ordre_de_mission_id.ville.nom_ville }} </li>
+                      <li><strong>Ville de destination :</strong> {{ notification.ordre_de_mission_id.Ville_destination.nom_ville }} </li>
+                    </ul>
+                  </div>
+                </li>
+              </a>
+            </ng-container>
+
+
+            <li class="flex align-items-center py-2 border-bottom-1 surface-border"></li>
+          </ng-container>
+        </ng-container>
+      </ng-container>
+    </ul>
+  </div>
+  </p-overlayPanel>
+
+

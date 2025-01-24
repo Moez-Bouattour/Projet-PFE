@@ -1,0 +1,152 @@
+
+<div class="card px-4 py-4">
+  <p-toast></p-toast>
+  <p-toolbar styleClass="mb-2">
+    <ng-template pTemplate="left">
+      <div class="my-2">
+        <button pButton pRipple label="Ajouter" icon="pi pi-plus" class="p-button-success mr-2"
+          (click)="openNew()"></button>
+      </div>
+    </ng-template>
+  </p-toolbar>
+  <p-table #dt [value]="voitures" responsiveLayout="scroll" [rows]="5"
+    [globalFilterFields]="['nom_voiture','immatricule']" [paginator]="true" [rowsPerPageOptions]="[5,10,15]"
+    [showCurrentPageReport]="true"
+    currentPageReportTemplate="Affichage de {first} à {last} des entrées {totalRecords}" [rowHover]="true">
+    <ng-template pTemplate="caption">
+      <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
+        <h5 class="m-0">
+          Gère les voitures
+        </h5>
+        <span class="block mt-2 md:mt-0 p-input-icon-left">
+          <i class="pi pi-search"></i>
+          <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Chercher..."
+            class="w-full sm:w-auto" />
+        </span>
+      </div>
+    </ng-template>
+    <ng-template pTemplate="header">
+      <tr>
+        <th pSortableColumn="id">Code<p-sortIcon field="id"></p-sortIcon></th>
+        <th pSortableColumn="nom_voiture">Nom voiture<p-sortIcon field="nom_voiture"></p-sortIcon></th>
+        <th pSortableColumn="immatricule">Immatricule<p-sortIcon field="immatricule"></p-sortIcon></th>
+        <th pSortableColumn="compteur_initiale">Compteur initial<p-sortIcon field="compteur_initiale"></p-sortIcon></th>
+        <th pSortableColumn="compteur_finale">Compteur finale<p-sortIcon field="compteur_finale"></p-sortIcon></th>
+        <th>Action</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-voiture>
+      <tr>
+        <td style="width:14%; min-width:5rem;"><span class="p-column-title">Code</span>
+          {{voiture.id}}
+        </td>
+        <td style="width:14%; min-width:9rem;">
+          <span class="p-column-title">Nom voiture</span>
+          {{voiture.nom_voiture}}
+        </td>
+        <td style="width:14%; min-width:9rem;">
+          <span class="p-column-title">Immatricule</span>
+          {{voiture.immatricule}}
+        </td>
+        <td style="width:14%; min-width:9rem;">
+          <span class="p-column-title">Compteur initial</span>
+          {{voiture.compteur_initiale}}
+        </td>
+        <td style="width:14%; min-width:9rem;">
+          <span class="p-column-title">Compteur finale</span>
+          {{voiture.compteur_finale}}
+        </td>
+        <td>
+          <div class="flex">
+            <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2"
+              (click)="getVoiture(voiture.id)"></button>
+            <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-warning"
+              (click)="deleteVoiture(voiture)"></button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+  <div *ngIf="voitureDialogue">
+    <p-dialog [(visible)]="voitureDialogue" [style]="{width: '500px',height:'650px'}" header="Ajouter voiture" [modal]="true"
+      class="p-fluid" [formGroup]="voitureForm" >
+        <div class="card">
+            <div class="p-fluid p-formgrid grid">
+              <div class="field col-12 md:col-8">
+                <label htmlFor="city">Nom voiture</label>
+                <input pInputText id="nom_voiture"  type="texte" formControlName="nom_voiture" required autofocus [ngClass]="{'ng-invalid ng-dirty' :submitted && voitureForm.get('nom_voiture')?.hasError('required')}"/>
+                <small class="ng-dirty ng-invalid" *ngIf="submitted && voitureForm.get('nom_voiture')?.hasError('required')">Nom voiture est requis.</small>
+                </div>
+                <div class="field col-12 md:col-8">
+                  <label htmlFor="city">Immatricule</label>
+                  <input pInputText id="immatricule"  type="texte" formControlName="immatricule" required autofocus [ngClass]="{'ng-invalid ng-dirty' :submitted && voitureForm.get('immatricule')?.hasError('required')}"/>
+                  <small class="ng-dirty ng-invalid" *ngIf="submitted && voitureForm.get('nom_voiture')?.hasError('required')">Immatricule est requis.</small>
+                  </div>
+                <div class="field col-12 md:col-8">
+                    <label htmlFor="city">Compteur initial</label>
+                    <input pInputText id="compteur_initiale"  type="texte" formControlName="compteur_initiale" required autofocus [ngClass]="{'ng-invalid ng-dirty' :submitted && voitureForm.get('compteur_initiale')?.hasError('required')}"/>
+                    <small class="ng-dirty ng-invalid" *ngIf="submitted && voitureForm.get('compteur_initiale')?.hasError('required')">Compteur initiale est requis.</small>
+                </div>
+                <div class="field col-12 md:col-8">
+                  <label htmlFor="city">Compteur finale</label>
+                  <input pInputText id="compteur_finale"  type="texte" formControlName="compteur_finale" required autofocus [ngClass]="{'ng-invalid ng-dirty' :submitted && voitureForm.get('compteur_finale')?.hasError('required')}"/>
+                  <small class="ng-dirty ng-invalid" *ngIf="submitted && voitureForm.get('compteur_finalee')?.hasError('required')">Compteur finale est requis.</small>
+              </div>
+            </div>
+      </div>
+      <ng-template pTemplate="footer">
+        <button pButton pRipple label="Annuler" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+        <button pButton pRipple label="Enregistrer" icon="pi pi-check" class="p-button-text"
+          (click)="addVoiture()" type="submit"></button>
+      </ng-template>
+    </p-dialog>
+  </div>
+  <div *ngIf="voitureDialogEdit">
+    <p-dialog [(visible)]="voitureDialogEdit" [style]="{width: '500px',height:'650px'}" header="Modifier voiture" [modal]="true"
+      class="p-fluid" [formGroup]="voitureFormEdit">
+      <div class="card">
+        <div class="p-fluid p-formgrid grid">
+          <div class="field col-12 md:col-8">
+            <label htmlFor="city">Nom voiture</label>
+            <input pInputText id="nom_voiture" type="text" formControlName="nom_voiture" required autofocus [ngClass]="{'ng-invalid ng-dirty' :submitted && voitureFormEdit.get('nom_voiture')?.hasError('required')}"/>
+            <small class="ng-dirty ng-invalid" *ngIf="voitureFormEdit.get('nom_voiture')?.hasError('required')">Nom voiture est requis.</small>
+        </div>
+
+          <div class="field col-12 md:col-8">
+            <label htmlFor="city">Immatricule</label>
+            <input pInputText id="immatricule" type="text" formControlName="immatricule" required autofocus [ngClass]="{'ng-invalid ng-dirty' :submitted && voitureFormEdit.get('immatricule')?.hasError('required')}"/>
+            <small class="ng-dirty ng-invalid" *ngIf="voitureFormEdit.get('immatricule')?.hasError('required')">Immatricule est requis.</small>
+        </div>
+          <div class="field col-12 md:col-8">
+              <label htmlFor="city">Compteur initial</label>
+              <input pInputText id="compteur_initiale" type="text" formControlName="compteur_initiale" required autofocus [ngClass]="{'ng-invalid ng-dirty' :submitted && voitureFormEdit.get('compteur_initiale')?.hasError('required')}"/>
+              <small class="ng-dirty ng-invalid" *ngIf="voitureFormEdit.get('compteur_initiale')?.hasError('required')">Compteur initiale est requis.</small>
+          </div>
+          <div class="field col-12 md:col-8">
+            <label htmlFor="city">Compteur finale</label>
+            <input pInputText id="compteur_finalee" type="text" formControlName="compteur_finale" required autofocus [ngClass]="{'ng-invalid ng-dirty' :submitted && voitureFormEdit.get('compteur_finale')?.hasError('required')}"/>
+            <small class="ng-dirty ng-invalid" *ngIf="voitureFormEdit.get('compteur_finalee')?.hasError('required')">Compteur finale est requis.</small>
+        </div>
+      </div>
+       </div>
+      <ng-template pTemplate="footer">
+        <button pButton pRipple label="Annuler" icon="pi pi-times" class="p-button-text"
+          (click)="hideDialogEdit()"></button>
+        <button pButton pRipple label="Enregistrer" icon="pi pi-check" class="p-button-text"
+          (click)="updateVoiture()" type="submit"></button>
+      </ng-template>
+    </p-dialog>
+  </div>
+<div *ngIf="deleteVoitureDialog">
+<p-dialog [(visible)]="deleteVoitureDialog" header="Confirmer" [modal]="true" [style]="{width:'450px'}">
+  <div class="flex align-items-center justify-content-center">
+    <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
+    <span *ngIf="voiture">Êtes-vous sûr de vouloir supprimer <b>{{voiture.nom_voiture}}</b>?</span>
+  </div>
+  <ng-template pTemplate="footer">
+    <button pButton pRipple icon="pi pi-times" class="p-button-text" label="Non"
+      (click)="deleteVoitureDialog = false"></button>
+    <button pButton pRipple icon="pi pi-check" class="p-button-text" label="Oui" (click)="confirmDelete()"></button>
+  </ng-template>
+</p-dialog>
+</div>

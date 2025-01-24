@@ -1,0 +1,265 @@
+<div class="card px-5 py-5">
+    <p-toast></p-toast>
+    <p-toolbar styleClass="mb-2">
+      <ng-template pTemplate="left">
+        <div class="my-2">
+          <button pButton pRipple label="Ajouter" icon="pi pi-plus" class="p-button-success mr-2"
+            (click)="openNew()"></button>
+        <button *ngIf="isRH()" pButton pRipple label="Calendrier" icon="pi pi-calendar"
+        (click)="openCalendarDialog()">
+      </button>
+        </div>
+      </ng-template>
+    </p-toolbar>
+    <p-table #dt [value]="ordres"  responsiveLayout="scroll" [rows]="5"
+      [globalFilterFields]="['nom_voiture','users.name','nom_ville','lastHistorique.Nom_Niveau','lastHistorique.Nom_etat','nom_ville_destination']" [paginator]="true" [rowsPerPageOptions]="[5,10,15]"
+      [showCurrentPageReport]="true" currentPageReportTemplate="Affichage de {first} à {last} des entrées {totalRecords}"
+      [rowHover]="true">
+      <ng-template pTemplate="caption">
+        <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
+          <h5 class="m-0">Gère les demandes d'ordre de mission</h5>
+          <span class="block mt-2 md:mt-0 p-input-icon-left">
+            <i class="pi pi-search"></i>
+            <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Chercher..."
+              class="w-full sm:w-auto" />
+          </span>
+        </div>
+      </ng-template>
+      <ng-template pTemplate="header">
+        <tr>
+          <th pSortableColumn="id">Code <p-sortIcon field="id"></p-sortIcon></th>
+          <th pSortableColumn="users.name">Nom utilisateur<p-sortIcon field="name"></p-sortIcon></th>
+          <th pSortableColumn="Date_sortie">Date sortie <p-sortIcon field="Date_sortie"></p-sortIcon></th>
+          <th pSortableColumn="Date_retour">Date retour <p-sortIcon field="Date_retour"></p-sortIcon></th>
+          <th pSortableColumn="nom_voiture">Nom Voiture <p-sortIcon field="voiture"></p-sortIcon></th>
+          <th pSortableColumn="compteur_initiale">Compteur initial <p-sortIcon field="compteur_initiale"></p-sortIcon></th>
+          <th pSortableColumn="compteur_finale">Compteur final <p-sortIcon field="compteur_finale"></p-sortIcon></th>
+          <th pSortableColumn="distance">Distance <p-sortIcon field="distance"></p-sortIcon></th>
+          <th pSortableColumn="nom_ville">Ville départ <p-sortIcon field="ville"></p-sortIcon></th>
+          <th pSortableColumn="nom_ville_destination">Ville destination <p-sortIcon field="ville_distination"></p-sortIcon></th>
+          <th pSortableColumn="lastHistorique.Nom_Niveau">Nom niveau<p-sortIcon field="Nom_Niveau"></p-sortIcon></th>
+          <th pSortableColumn="Nom_etat">Nom état<p-sortIcon field="Nom_etat"></p-sortIcon></th>
+          <th>Action</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-ordre>
+        <tr [style.background-color]="ordre.lastHistorique.etats.couleur">
+          <td style="width:14%; min-width:6rem;"><span class="p-column-title">Code</span>
+            {{ordre.id}}
+          </td>
+          <td style="width:14%; min-width:6rem;"><span class="p-column-title">Nom utilisateur</span>
+            {{ordre.users.name}}
+          </td>
+          <td style="width:14%; min-width:9rem;"><span class="p-column-title">Date sortie </span>
+            {{ordre.Date_sortie}}
+          </td>
+          <td style="width:14%; min-width:9rem;"><span class="p-column-title">Date retour</span>
+            {{ordre.Date_retour}}
+          </td>
+          <td style="width:14%; min-width:13rem;"><span class="p-column-title">Nom voiture</span>
+            {{ordre.nom_voiture}} -  {{ordre.voiture.immatricule}}
+          </td>
+          <td style="width:14%; min-width:9rem;"><span class="p-column-title">Compteur initial</span>
+            {{ordre.compteur_initiale}} Km
+          </td>
+          <td style="width:14%; min-width:7rem;"><span class="p-column-title">Compteur final</span>
+            {{ordre.compteur_finale}} Km
+          </td>
+          <td style="width:14%; min-width:7rem;">
+            <span class="p-column-title">Distance</span>
+            {{ ordre.compteur_finale - ordre.compteur_initiale }} Km
+          </td>
+          <td style="width:14%; min-width:7rem;"><span class="p-column-title">Ville départ</span>
+            {{ordre.nom_ville}}
+          </td>
+          <td style="width:14%; min-width:7rem;"><span class="p-column-title">Ville destination</span>
+            {{ordre.nom_ville_destination}}
+          </td>
+          <td style="width:14%; min-width:7rem;">
+            <button pButton pRipple type="button" [label]="ordre.lastHistorique.Nom_Niveau" class="p-button-secondary p-button-text" ></button>
+        </td>
+        <td style="width:14%; min-width:8rem;">
+            <button pButton pRipple type="button" [label]="ordre.lastHistorique.Nom_etat" class="p-button-secondary p-button-text" (click)="openEtatDialog(ordre.id)"></button>
+        </td>
+        <td>
+        <div *ngIf="ordre.lastHistorique.Nom_Niveau==poste && ordre.lastHistorique.Nom_etat=='en attente'" class="flex flex-wrap gap-2" >
+          <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2"
+            (click)="getOrdre(ordre.id)"></button>
+        </div>
+        <div *ngIf="ordre.lastHistorique.Nom_Niveau =='RH' && ordre.lastHistorique.Nom_etat == 'accepté'" class="flex flex-wrap gap-2">
+          <button pButton pRipple type="button" icon="pi pi-print" class=" p-button-rounded p-button-danger mr-2" (click)="imprimerDemande(ordre)"></button>
+        </div>
+        </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+<div *ngIf="ordreDialogAdd">
+  <p-dialog [(visible)]="ordreDialogAdd" header="Ajouter demande d'ordre de mission" [modal]="true" [style]="{width: '900px','height': '850px'}" class="p-fluid">
+    <form [formGroup]="ordreForm" (ngSubmit)="addOrdre()">
+      <div class="col-12">
+        <div class="card">
+          <div class="p-fluid p-formgrid grid">
+            <div class="field col-4 md:col-4">
+              <label htmlFor="name2">Date sortie</label>
+              <p-calendar formControlName="Date_sortie" [showIcon]="true" (ngModelChange)="validerDates()" inputId="date_sortie" required autofocus [ngClass]="{'ng-invalid ng-dirty' :submitted && ordreForm.get('Date_sortie')?.hasError('required')}"></p-calendar>
+              <small class="ng-dirty ng-invalid" *ngIf="submitted && ordreForm.get('Date_sortie')?.hasError('required')">Date de sortie est requis.</small>
+            </div>
+            <div class="field col-4 md:col-4 ">
+              <label htmlFor="name2">Date retour</label>
+              <p-calendar formControlName="Date_retour" [showIcon]="true" (ngModelChange)="onDateRetourChange();validerDates()" inputId="date_retour" required autofocus [ngClass]="{'ng-invalid ng-dirty' :submitted && ordreForm.get('Date_retour')?.hasError('required')}"></p-calendar>
+              <small class="ng-dirty ng-invalid" *ngIf="submitted && ordreForm.get('Date_retour')?.hasError('required')">Date de retour est requis.</small>
+            </div>
+            <div class="field col-4 md:col-4 ">
+              <label htmlFor="name2">Voiture</label>
+              <p-dropdown formControlName="id_voiture" (ngModelChange)="onDateRetourChange()" [options]="voituresDisponibles" placeholder="Sélectionner une voiture"  [showClear]="true" optionLabel="displayLabel" optionValue="id" required autofocus [ngClass]="{'ng-invalid ng-dirty' :submitted && ordreForm.get('id_voiture')?.hasError('required')}"></p-dropdown>
+              <small class="ng-dirty ng-invalid" *ngIf="submitted && ordreForm.get('id_voiture')?.hasError('required')">voiture est requis.</small>
+            </div>
+            <div class="field col-4 md:col-4 ">
+              <label htmlFor="name2">Compteur initial</label>
+              <input [value]="compteurInitial" formControlName="compteur_initiale" pInputText id="compteur_initiale" type="text" disabled/>
+            </div>
+            <div class="field col-4 md:col-4 ">
+              <label htmlFor="name2">Compteur final</label>
+              <input (change)="change($event)" formControlName="compteur_finale" pInputText id="compteur_finale" type="text" inputId="compteur_finale" required autofocus [ngClass]="{'ng-invalid ng-dirty' :submitted && ordreForm.get('compteur_finale')?.hasError('required')}"/>
+              <small class="ng-dirty ng-invalid" *ngIf="submitted && ordreForm.get('compteur_finale')?.hasError('required')">compteur finale est requis.</small>
+            </div>
+            <div class="field col-4 md:col-4 ">
+              <label htmlFor="name2">Distance</label>
+              <input [value]="distance" pInputText id="distance" type="text" disabled/>
+            </div>
+            <div class="field col-4 md:col-4 ">
+              <label htmlFor="name2">Ville départ</label>
+              <p-dropdown formControlName="id_ville" [options]="villes" placeholder="Sélectionner une ville" [showClear]="true" optionLabel="nom_ville" optionValue="id" required autofocus [ngClass]="{'ng-invalid ng-dirty' :submitted && ordreForm.get('id_ville')?.hasError('required')}"></p-dropdown>
+              <small class="ng-dirty ng-invalid" *ngIf="submitted && ordreForm.get('id_ville')?.hasError('required')">Ville départ est requis.</small>
+            </div>
+            <div class="field col-4 md:col-4 ">
+              <label htmlFor="name2">Ville destination</label>
+              <p-dropdown formControlName="id_ville_destination" [options]="villes" placeholder="Sélectionner une ville" [showClear]="true" optionLabel="nom_ville" optionValue="id"  required autofocus [ngClass]="{'ng-invalid ng-dirty' :submitted && ordreForm.get('id_ville_destination')?.hasError('required')}"></p-dropdown>
+              <small class="ng-dirty ng-invalid" *ngIf="submitted && ordreForm.get('id_ville_destination')?.hasError('required')">Ville destination est requis.</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+      <ng-template pTemplate="footer">
+        <button pButton pRipple type="button" label="Annuler" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+        <button pButton pRipple type="submit" label="Enregistrer" icon="pi pi-check" class="p-button-text" (click)="addOrdre()"></button>
+      </ng-template>
+      <div class="p-formgrid grid">
+        <div class="col-12 mb-2 lg:col-4 lg:mb-0">
+          <label htmlFor="Nom_Niveau">Nom niveau</label>
+          <input pInputText id="Nom_Niveau" [value]="ordreForm .get('Nom_Niveau').value" disabled />
+        </div>
+        <div class="col-12 mb-2 lg:col-4 lg:mb-0">
+          <label htmlFor="Nom_etat">Nom état</label>
+          <input pInputText id="Nom_etat" [value]="ordreForm.get('Nom_etat').value" disabled />
+        </div>
+      </div>
+  </p-dialog>
+</div>
+
+<div *ngIf="etatDialog">
+  <p-dialog [(visible)]="etatDialog" [style]="{width: '450px','height': '500px'}" header="Modifier Etat" [modal]="true" class="p-fluid">
+    <ng-template pTemplate="content">
+      <div class="field">
+        <label for="Nom_etat">État</label>
+        <p-dropdown [(ngModel)]="selectedNomEtat" [options]="etats" placeholder="Sélectionner un etat" [showClear]="true" optionLabel="Nom_etat" optionValue="Nom_etat" ></p-dropdown>
+      </div>
+    </ng-template>
+    <ng-template pTemplate="footer">
+      <button pButton type="button" label="Annuler" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+      <button pButton type="button" label="Enregistrer" icon="pi pi-check" class="p-button-text" (click)="updateEtat()"></button>
+    </ng-template>
+  </p-dialog>
+</div>
+<div *ngIf="ordreDialogEdit">
+  <p-dialog [(visible)]="ordreDialogEdit" header="Modifier demande d'ordre de mission" [modal]="true" [style]="{width: '900px','height': '700px'}" class="p-fluid">
+    <form [formGroup]="ordreFormEdit" (ngSubmit)="updateOrdre()">
+      <div class="col-12">
+        <div class="card">
+          <div class="p-fluid p-formgrid grid">
+            <div class="field col-4 md:col-4">
+              <label htmlFor="name2">Date sortie</label>
+              <p-calendar formControlName="Date_sortie" [showIcon]="true"  inputId="date_sortie"></p-calendar>
+            </div>
+            <div class="field col-4 md:col-4 ">
+              <label htmlFor="name2">Date retour</label>
+              <p-calendar formControlName="Date_retour" [showIcon]="true" inputId="date_retour"></p-calendar>
+            </div>
+            <div class="field col-4 md:col-4 ">
+              <label htmlFor="name2">Voiture</label>
+              <p-dropdown formControlName="id_voiture" [options]="voitures" placeholder="Sélectionner une voiture" (onChange)="changeEdit($event)" [showClear]="true" optionLabel="nom_voiture" optionValue="nom_voiture"></p-dropdown>
+            </div>
+            <div class="field col-4 md:col-4 ">
+              <label htmlFor="name2">Compteur initial</label>
+              <input [value]="compteur" pInputText id="compteur_initiale" type="text" disabled/>
+            </div>
+            <div class="field col-4 md:col-4 ">
+              <label htmlFor="name2">Compteur final</label>
+              <input formControlName="compteur_finale" (change)="changeEditDistance($event)" pInputText id="compteurFinale"  type="text" />
+            </div>
+            <div class="field col-4 md:col-4 ">
+              <label htmlFor="name2">Distance</label>
+              <input [value]="distance" pInputText id="distance" type="text" disabled/>
+            </div>
+            <div class="field col-4 md:col-4 ">
+              <label htmlFor="name2">Ville départ</label>
+              <p-dropdown formControlName="id_ville" [options]="villes" placeholder="Sélectionner une ville" [showClear]="true" optionLabel="nom_ville" optionValue="nom_ville"></p-dropdown>
+            </div>
+            <div class="field col-4 md:col-4 ">
+              <label htmlFor="name2">Ville Destination</label>
+              <p-dropdown formControlName="id_ville_destination" [options]="villes" placeholder="Sélectionner une ville" [showClear]="true" optionLabel="nom_ville" optionValue="nom_ville"></p-dropdown>
+            </div>
+          </div>
+        </div>
+      </div> </form>
+      <ng-template pTemplate="footer">
+        <button pButton pRipple type="button" label="Annuler" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+        <button pButton pRipple type="submit" label="Enregistrer" icon="pi pi-check" class="p-button-text" (click)="updateOrdre()"></button>
+      </ng-template>
+      <div class="p-formgrid grid">
+        <div class="col-12 mb-2 lg:col-4 lg:mb-0">
+          <label htmlFor="Nom_Niveau">Nom niveau</label>
+          <input pInputText id="Nom_Niveau" [value]="ordreFormEdit.get('Nom_Niveau').value" disabled />
+        </div>
+        <div class="col-12 mb-2 lg:col-4 lg:mb-0">
+          <label htmlFor="Nom_etat">Nom état</label>
+          <input pInputText id="Nom_etat" [value]="ordreFormEdit.get('Nom_etat').value" disabled />
+        </div>
+      </div>
+  </p-dialog>
+</div>
+ <!-- Calendrier -->
+ <div *ngIf="calendarDialogVisible">
+  <p-dialog header="Calendrier des demandes d'ordres de mission acceptées" [(visible)]="calendarDialogVisible" [modal]="true"
+    [style]="{ width: '1000px','height': '700px' }">
+    <full-calendar [options]="calendarOptions" [style]="{ width: '900px','height': '700px' }" (dateClick)="handleCalendarDateClick($event)"></full-calendar>
+    <ng-template pTemplate="footer">
+      <button pButton pRipple type="button" label="Fermer" icon="pi pi-times" class="p-button-text"
+        (click)="closeCalendarDialog()"></button>
+    </ng-template>
+  </p-dialog>
+</div>
+
+<div *ngIf="eventDialogVisible">
+  <p-dialog header="Détails de la demande d'ordre de mission" [(visible)]="eventDialogVisible">
+    <ng-template pTemplate="content">
+      <div class="card">
+      <p><strong>Nom utilisateur: </strong> {{ selectedOrdre.users.name }}</p>
+      <p><strong>Département utilisateur: </strong> {{ selectedOrdre.users.departement }}</p>
+      <p><strong>Poste utilisateur:</strong> {{ selectedOrdre.users.poste }}</p>
+      <p><strong>Nom voiture: </strong> {{ selectedOrdre.nom_voiture }}</p>
+      <p><strong>Ville de départ: </strong> {{ selectedOrdre.nom_ville }}</p>
+      <p><strong>Ville de destination: </strong> {{ selectedOrdre.nom_ville_destination }}</p>
+      <p><strong>Date de sortie: </strong> {{ selectedOrdre.Date_sortie }}</p>
+      <p><strong>Date de retour: </strong> {{ selectedOrdre.Date_retour }}</p>
+      </div>
+    </ng-template>
+    <ng-template pTemplate="footer">
+      <button pButton pRipple type="button" label="Fermer" icon="pi pi-times" class="p-button-text"
+        (click)="closeeventDialog()"></button>
+    </ng-template>
+  </p-dialog>
+</div>
+

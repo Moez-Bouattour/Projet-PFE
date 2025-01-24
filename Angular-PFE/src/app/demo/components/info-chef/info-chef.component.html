@@ -1,0 +1,47 @@
+<div class="grid">
+  <div class="col-12 md:col-6">
+    <div style="text-align: center; width: 50%;">
+      <p-avatar icon="pi pi-user" pBadge severity="success" size="xlarge"></p-avatar>
+      <h4>Informations professionnelles</h4>
+      <p-scrollPanel [style]="{width: '250px', height: '200px'}">
+        <p>Informations sur votre fonction </p>
+      </p-scrollPanel>
+    </div>
+  </div>
+  <div class="grid" style="display: flex; justify-content: center; margin-top: 20px;">
+    <div class="col-12 xl:col-12">
+      <div class="card p-fluid"
+        style="width: 100%; max-width: 600px; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+        <p-toolbar>
+          <div style="text-align: center; width: 100%;">
+            <h5>{{name}}</h5>
+            <h6>{{poste}}</h6>
+            <h6>Département : {{departement}}</h6>
+          </div>
+          <div class="col-12 xl:col-12">
+            <div class="card">
+                <h5>Liste de l'équipe</h5>
+                <p-table [value]="users" [paginator]="true" [rows]="5" responsiveLayout="scroll">
+                  <ng-template pTemplate="header">
+                    <tr>
+                        <th>Nom</th>
+                        <th>Email</th>
+                        <th>Téléphone</th>
+                    </tr>
+                </ng-template>
+                    <ng-template pTemplate="body" let-user>
+                        <tr>
+                            <td style="width: 35%; min-width: 7rem;">{{user.name}}</td>
+                            <td style="width: 35%; min-width: 8rem;">{{user.email}}</td>
+                            <td style="width: 35%; min-width: 8rem;">{{user.telephone}}</td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </div>
+        </div>
+
+</p-toolbar>
+</div>
+    </div>
+  </div>
+</div>

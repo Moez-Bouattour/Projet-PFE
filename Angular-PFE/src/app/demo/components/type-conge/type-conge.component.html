@@ -1,0 +1,124 @@
+<div class="grid p-fluid">
+<div class="col-12 md:col-8">
+  <div class="card">
+<p-toast></p-toast>
+<p-toolbar styleClass="mb-2">
+  <ng-template pTemplate="left">
+    <div class="my-2">
+      <button pButton pRipple label="Ajouter" icon="pi pi-plus" class="p-button-success mr-2"
+        (click)="openNew()"></button>
+    </div>
+  </ng-template>
+</p-toolbar>
+<p-table #dt [value]="typeConges"  responsiveLayout="scroll" [rows]="5"
+[globalFilterFields]="['type_nom_conge']" [paginator]="true" [rowsPerPageOptions]="[5,10,15]"
+[showCurrentPageReport]="true" currentPageReportTemplate="Affichage de {first} à {last} des entrées {totalRecords}"
+[rowHover]="true">
+<ng-template pTemplate="caption">
+<div class="flex flex-row justify-content-between items-center">
+<div class="w-full">
+  <h5 class="m-1">Gère les types congés </h5>
+</div>
+<div class="block mt-5 md:mt-0 p-input-icon-right text-right">
+  <i class="pi pi-search"></i>
+  <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Chercher..." class="w-full sm:w-auto" />
+</div>
+</div>
+</ng-template>
+
+
+<ng-template pTemplate="header">
+<tr>
+<th pSortableColumn="type_nom_conge">Type Congé<p-sortIcon field="type_nom_conge"></p-sortIcon></th>
+<th pSortableColumn="duree">Durée<p-sortIcon field="duree"></p-sortIcon></th>
+<th>Action</th>
+</tr>
+</ng-template>
+<ng-template pTemplate="body" let-typeConge>
+<tr>
+<td style="width:15%; min-width:9rem;">
+<span class="p-column-title">Type congé</span>
+{{typeConge.type_nom_conge}}
+</td>
+<td style="width:15%; min-width:9rem;">
+  <span class="p-column-title">Durée</span>
+  {{typeConge.duree}}
+</td>
+<td>
+<div class="flex flex-wrap gap-2">
+  <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2"
+    (click)="getTypeConge(typeConge.id)"></button>
+  <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-warning"
+    (click)="deleteTypeConge(typeConge)"></button>
+</div>
+</td>
+</tr>
+</ng-template>
+</p-table>
+</div>
+</div>
+
+<div *ngIf="typeCongeDialogAdd">
+  <p-dialog [(visible)]="typeCongeDialogAdd" [style]="{width: '500px',height:'450px'}" header="Ajouter type congé" [modal]="true"
+    class="p-fluid" [formGroup]="typeCongeForm" >
+      <div class="card">
+          <div class="p-fluid p-formgrid grid">
+              <div class="field col-12 md:col-8">
+                  <label htmlFor="lastname2">Type congé</label>
+                  <input pInputText  type="texte" id="type_nom_conge" formControlName="type_nom_conge" inputId="type_nom_conge" required autofocus [ngClass]="{'ng-invalid ng-dirty' :submitted && typeCongeForm.get('type_nom_conge')?.hasError('required')}"/>
+                  <small class="ng-dirty ng-invalid" *ngIf="submitted && typeCongeForm.get('type_nom_conge')?.hasError('required')">Type Conge est requis.</small>
+              </div>
+              <div>
+              </div>
+              <div class="field col-12 md:col-8">
+                  <label htmlFor="city">Durée</label>
+                  <input pInputText id="duree"  type="texte" formControlName="duree" required autofocus [ngClass]="{'ng-invalid ng-dirty' :submitted && typeCongeForm.get('duree')?.hasError('required')}"/>
+                  <small class="ng-dirty ng-invalid" *ngIf="submitted && typeCongeForm.get('duree')?.hasError('required')">Duree est requis.</small>
+              </div>
+          </div>
+    </div>
+    <ng-template pTemplate="footer">
+      <button pButton pRipple label="Annuler" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+      <button pButton pRipple label="Enregistrer" icon="pi pi-check" class="p-button-text"
+        (click)="addTypeConge()" type="submit"></button>
+    </ng-template>
+  </p-dialog>
+</div>
+<div *ngIf="typeCongeDialogEdit">
+  <p-dialog [(visible)]="typeCongeDialogEdit" [style]="{width: '500px',height:'450px'}" header="Modifier type congé" [modal]="true"
+    class="p-fluid" [formGroup]="typeCongeFormEdit">
+    <div class="card">
+      <div class="p-fluid p-formgrid grid">
+        <div class="field col-12 md:col-8">
+            <label htmlFor="lastname2">Type congé</label>
+            <input pInputText id="type_nom_conge" formControlName="type_nom_conge" inputId="type_nom_conge" required autofocus [ngClass]="{'ng-invalid ng-dirty' :submitted && typeCongeFormEdit.get('type_nom_conge')?.hasError('required')}"/>
+            <small class="ng-dirty ng-invalid" *ngIf="typeCongeFormEdit.get('date')?.hasError('required')">Date est requis.</small>
+        </div>
+        <div class="field col-12 md:col-8">
+            <label htmlFor="city">Durée</label>
+            <input pInputText id="duree" type="text" formControlName="duree" required autofocus [ngClass]="{'ng-invalid ng-dirty' :submitted && typeCongeFormEdit.get('duree')?.hasError('required')}"/>
+            <small class="ng-dirty ng-invalid" *ngIf="typeCongeFormEdit.get('duree')?.hasError('required')">Durée est requis.</small>
+        </div>
+    </div>
+     </div>
+    <ng-template pTemplate="footer">
+      <button pButton pRipple label="Annuler" icon="pi pi-times" class="p-button-text"
+        (click)="hideDialogEdit()"></button>
+      <button pButton pRipple label="Enregistrer" icon="pi pi-check" class="p-button-text"
+        (click)="updateTypeConge()" type="submit"></button>
+    </ng-template>
+  </p-dialog>
+</div>
+<div *ngIf="deleteTypeCongeDialog">
+  <p-dialog [(visible)]="deleteTypeCongeDialog" header="Confirmer" [modal]="true" [style]="{width:'450px'}">
+    <div class="flex align-items-center justify-content-center">
+      <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
+      <span *ngIf="typeConge">Êtes-vous sûr de vouloir supprimer <b>{{typeConge.type_nom_conge}}</b>?</span>
+    </div>
+    <ng-template pTemplate="footer">
+      <button pButton pRipple icon="pi pi-times" class="p-button-text" label="Non"
+        (click)="deleteTypeCongeDialog = false"></button>
+      <button pButton pRipple icon="pi pi-check" class="p-button-text" label="Oui" (click)="confirmDelete()"></button>
+    </ng-template>
+  </p-dialog>
+</div>

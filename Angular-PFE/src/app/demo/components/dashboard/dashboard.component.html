@@ -1,0 +1,45 @@
+<div class="grid p-fluid">
+<div class="col-12 lg:col-6 xl:col-12">
+  <div class="card mb-0">
+    <h4>Bonjour, Admin</h4>
+    <h6>{{ currentDate }}</h6>
+
+  </div>
+</div>
+<div class="col-12 lg:col-6">
+  <div class="card">
+    <h5>Nombre total des demandes de congé acceptées de l'année 2025 : {{ totalCongesAcceptees }} demandes </h5>
+    <p-chart type="bar" [data]="data1" [options]="options1"></p-chart>
+  </div>
+</div>
+<div class="col-12 lg:col-6">
+  <div class="card">
+    <h5>Nombre total des demandes de congé acceptées de l'année 2025 par employé pour le mois de Janvier : {{congesAvril}} demandes </h5>
+    <p-chart type="bar" [data]="dataEmploye" [options]="optionsEmploye"></p-chart>
+  </div>
+</div>
+<div class="col-12 lg:col-6">
+  <div class="card">
+    <h5>Nombre total des demandes d'autorisations acceptées de l'année 2025 : {{ totalAutorisationsAcceptees }} demandes </h5>
+    <p-chart type="bar" [data]="secondData" [options]="secondOptions"></p-chart>
+  </div>
+</div>
+<div class="col-12 lg:col-6">
+  <div class="card">
+    <h5>Nombre total des demandes d'autorisations acceptées de l'année 2025 par employé pour le mois de Janvier </h5>
+    <p-chart type="bar" [data]="thirdData" [options]="thirdOptions"></p-chart>
+  </div>
+</div>
+<div class="col-12 lg:col-6">
+  <div class="card">
+    <h5>Nombre total des demandes d'ordre de mission acceptées de l'année 2025 : {{ nombreOrdresAcceptes }} demandes </h5>
+    <p-chart type="line" [data]="lineData" [options]="lineOptions"></p-chart>
+  </div>
+</div>
+<div class="col-12 lg:col-6">
+  <div class="card">
+    <h5>Le total du trajet des voitures pour le mois de Janvier de l'année 2025 </h5>
+    <p-chart type="line" [data]="dataVoiture" [options]="optionsVoiture"></p-chart>
+  </div>
+</div>
+</div>

@@ -1,0 +1,433 @@
+<div class="grid">
+  <div class="col-12 xl:col-6">
+    <div class="card px-5 py-5">
+      <p-toast></p-toast>
+      <p-table #dt [value]="users" responsiveLayout="scroll" [rows]="5" [paginator]="true"
+        [rowsPerPageOptions]="[5,10,15]" [showCurrentPageReport]="true" [globalFilterFields]="['user.name']"
+        currentPageReportTemplate="Affichage de {first} à {last} des entrées {totalRecords}" [rowHover]="true">
+        <ng-template pTemplate="caption">
+          <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
+            <h5 class="m-0">Liste des employés</h5>
+            <span class="block mt-5 md:mt-0 p-input-icon-left">
+              <i class="pi pi-search"></i>
+              <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Chercher..."
+                class="w-full sm:w-auto" />
+            </span>
+          </div>
+        </ng-template>
+        <ng-template pTemplate="header">
+          <tr>
+            <th pSortableColumn="user.id">Code<p-sortIcon field="user.id"></p-sortIcon></th>
+            <th pSortableColumn="user.name">Nom & Prénom<p-sortIcon field="user.name"></p-sortIcon></th>
+            <th pSortableColumn="user.sexe">Genre<p-sortIcon field="user.sexe"></p-sortIcon></th>
+            <th pSortableColumn="user.situation">Situation<p-sortIcon field="user.situation"></p-sortIcon></th>
+            <th pSortableColumn="user.date_embauche">Date d'embauche<p-sortIcon field="user.date_embauche"></p-sortIcon>
+            </th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-user>
+          <tr [ngStyle]="{'background-color': (user === selected && soldeDialog) ? '#FBFADA' : 'inherit'}">
+            <td (click)="onChildUser(user)" style="width:14%; min-width:5rem;"><span class="p-column-title">Code</span>
+              {{user.user.id}}
+            </td>
+            <td (click)="onChildUser(user)" style="width:14%; min-width:9rem;"><span class="p-column-title">Nom &
+                Prénom</span>
+              {{user.user.name}}
+            </td>
+            <td (click)="onChildUser(user)" style="width:14%; min-width:6rem;"><span class="p-column-title">Genre</span>
+              {{user.user.sexe}}
+            </td>
+            <td (click)="onChildUser(user)" style="width:14%; min-width:6rem;"><span
+                class="p-column-title">Situation</span>
+              {{user.user.situation}}
+            </td>
+            <td (click)="onChildUser(user)" style="width:14%; min-width:8rem;"><span class="p-column-title">Date
+                d'embauche</span>
+              {{user.user.date_embauche}}
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
+
+<div class="col-12 xl:col-6">
+    <div *ngIf="soldeDialog">
+      <div class="card px-4 py-4">
+        <p-toolbar styleClass="mb-2">
+          <ng-template pTemplate="left">
+            <div class="my-2">
+              <button pButton pRipple label="Ajouter" icon="pi pi-plus" class="p-button-success mr-2"
+                (click)="openNewSolde()"></button>
+              <p-splitButton label="Savoir plus" icon="pi pi-plus" [model]="items"
+                styleClass="p-button-info"></p-splitButton>
+            </div>
+          </ng-template>
+        </p-toolbar>
+        <p-table #dt [value]="anneeSelected" responsiveLayout="scroll" [rows]="5" [paginator]="true"
+          [rowsPerPageOptions]="[5,10,15]" [showCurrentPageReport]="true"
+          [globalFilterFields]="['type_conge.type_nom_conge']"
+          currentPageReportTemplate="Affichage de {first} à {last} des entrées {totalRecords}" [rowHover]="true">
+          <ng-template pTemplate="caption">
+            <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
+              <h5 class="m-0">Les soldes de {{name}} de l'année : {{lastYear}}</h5>
+              <span class="block mt-5 md:mt-0 p-input-icon-left">
+                <i class="pi pi-search"></i>
+                <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Chercher..."
+                  class="w-full sm:w-auto" />
+              </span>
+            </div>
+          </ng-template>
+          <ng-template pTemplate="header">
+            <tr>
+              <th pSortableColumn="type_conge.type_nom_conge">Type congé<p-sortIcon field="type_nom_conge"></p-sortIcon>
+              </th>
+              <th pSortableColumn="duree">Durée<p-sortIcon field="duree"></p-sortIcon></th>
+              <th pSortableColumn="solde">Solde<p-sortIcon field="solde"></p-sortIcon></th>
+              <th pSortableColumn="solde_initiale">Solde initiale<p-sortIcon field="solde_initiale"></p-sortIcon></th>
+              <th pSortableColumn="conge_pris">Solde pris<p-sortIcon field="conge_pris"></p-sortIcon></th>
+              <th>Action</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-solde>
+            <tr>
+              <td style="width:14%; min-width:8rem;"><span class="p-column-title">Type congé</span>
+                {{solde.type_conge.type_nom_conge}}
+              </td>
+              <td style="width:14%; min-width:6rem;"><span class="p-column-title">Durée</span>
+                {{solde.duree}}
+              </td>
+              <td style="width:14%; min-width:6rem;"><span class="p-column-title">Solde</span>
+                {{solde.solde}}
+              </td>
+              <td style="width:14%; min-width:6rem;"><span class="p-column-title">Solde initiale</span>
+                {{solde.solde_initiale}}
+              </td>
+              <td style="width:14%; min-width:6rem;"><span class="p-column-title">Solde pris</span>
+                {{solde.conge_pris}}
+              </td>
+
+              <td>
+              <div class="flex flex-wrap gap-2">
+                <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2"
+                  (click)="getSolde(solde)"></button>
+              </div>
+            </td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="footer">
+            <tr>
+              <td>Somme</td>
+              <td>{{totalDuree}}</td>
+              <td>{{totalSolde}}</td>
+              <td>{{totalSoldeInitiale}}</td>
+              <td>{{totalSoldeRequis}}</td>
+
+              <td></td>
+            </tr>
+          </ng-template>
+        </p-table>
+
+      </div>
+    </div>
+    <br>
+  <div *ngIf="anneePrecedenteDialog">
+      <div class="card px-4 py-4">
+        <p-toolbar styleClass="mb-2">
+          <ng-template pTemplate="left">
+            <div class="my-2">
+              <button pButton pRipple label="Ajouter" icon="pi pi-plus" class="p-button-success mr-2"
+                (click)="openNewAnnee()"></button>
+            </div>
+          </ng-template>
+        </p-toolbar>
+        <p-table #dt [value]="AnneesSelectionner" responsiveLayout="scroll" [rows]="5" [paginator]="true"
+          [rowsPerPageOptions]="[5,10,15]" [showCurrentPageReport]="true" [globalFilterFields]="['annee']"
+          currentPageReportTemplate="Affichage de {first} à {last} des entrées {totalRecords}" [rowHover]="true">
+          <ng-template pTemplate="caption">
+            <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
+              <h5 class="m-0">Gère les années</h5>
+              <span class="block mt-5 md:mt-0 p-input-icon-left">
+                <i class="pi pi-search"></i>
+                <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Chercher..."
+                  class="w-full sm:w-auto" />
+              </span>
+            </div>
+          </ng-template>
+          <ng-template pTemplate="header">
+            <tr>
+              <th pSortableColumn="annee">Année<p-sortIcon field="annee"></p-sortIcon></th>
+              <th pSortableColumn="cloture">Clôturer<p-sortIcon field="cloture"></p-sortIcon></th>
+              <th>Action</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-annee>
+            <tr>
+              <td style="width:14%; min-width:8rem;">
+                <span class="p-column-title">Année</span>
+                {{annee.annee}}
+              </td>
+              <td style="width:14%; min-width:8rem;">
+                <span class="p-column-title">Clôturer</span>
+                <span *ngIf="annee.cloture === 1">oui</span>
+                <span *ngIf="annee.cloture !== 1">non</span>
+              </td>
+              <td>
+                <div class="flex flex-wrap gap-2">
+                  <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2"
+                    (click)="getAnnee(annee)"></button>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="anneeDialogueAdd">
+  <p-dialog [(visible)]="anneeDialogueAdd" [style]="{width: '450px'}" header="Ajouter année" [modal]="true"
+    class="p-fluid">
+    <ng-template pTemplate="content">
+      <div class="field">
+        <label for="annee">Année</label>
+        <input type="text" pInputText id="annee" [(ngModel)]="solde.annee" required autofocus
+          [ngClass]="{'ng-invalid ng-dirty' :submitted && !solde.annee}" />
+        <small class="ng-dirty ng-invalid" *ngIf="submitted && !solde.annee">Année est requis.</small>
+      </div>
+      <div class="field">
+        <label for="cloture">Clôturer</label>
+        <br>
+        <p-toggleButton (onChange)="event($event)" [(ngModel)]="valToggle" onLabel="Oui" offLabel="Non"
+          [style]="{'width': '5em'}"></p-toggleButton>
+      </div>
+    </ng-template>
+    <ng-template pTemplate="footer">
+      <button pButton pRipple label="Annuler" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+      <button pButton pRipple label="Enregistrer" icon="pi pi-check" class="p-button-text"
+        (click)="addAnnee()"></button>
+    </ng-template>
+  </p-dialog>
+</div>
+<div *ngIf="anneeDialogEdit">
+  <p-dialog [(visible)]="anneeDialogEdit" [style]="{width: '450px'}" header="Modifier année" [modal]="true"
+    class="p-fluid">
+    <ng-template pTemplate="content">
+      <div class="field">
+        <label for="annee">Année</label>
+        <input type="text" pInputText id="annee" [(ngModel)]="solde.annee" required autofocus
+          [ngClass]="{'ng-invalid ng-dirty' :submitted && !solde.annee}" />
+        <small class="ng-dirty ng-invalid" *ngIf="submitted && !solde.annee">Année est requis.</small>
+      </div>
+      <div class="field">
+        <label for="cloture">Clôturer </label>
+        <br>
+        <p-toggleButton (onChange)="event($event)" [(ngModel)]="solde.cloture" onLabel="Oui" offLabel="Non"
+          [style]="{'width': '5em'}"></p-toggleButton>
+      </div>
+    </ng-template>
+    <ng-template pTemplate="footer">
+      <button pButton pRipple label="Annuler" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+      <button pButton pRipple label="Enregistrer" icon="pi pi-check" class="p-button-text"
+        (click)="updateAnnee()"></button>
+    </ng-template>
+  </p-dialog>
+</div>
+
+<div *ngIf="soldeDialogueAdd">
+  <p-dialog [(visible)]="soldeDialogueAdd" [style]="{width: '450px'}" header="Ajouter solde"
+    [modal]="true" class="p-fluid">
+    <ng-template pTemplate="content">
+      <div class="field">
+        <label for="type_conges">Type congé</label>
+        <p-dropdown (onChange)="changeType($event)" [(ngModel)]="selectedTypeConge" [options]="typesConges"
+          placeholder="Sélectionner un type congé" [showClear]="true" optionLabel="type_nom_conge"
+          optionValue="id"></p-dropdown>
+      </div>
+      <div class="field">
+        <label for="duree">Durée</label>
+        <input type="text" pInputText id="duree" [value]="duree"/>
+      </div>
+      <div class="field">
+        <label for="solde">Solde</label>
+        <input type="text" pInputText id="solde" [(ngModel)]="solde.solde" required autofocus
+            [ngClass]="{'ng-invalid ng-dirty' :submitted && !solde.solde}" />
+      </div>
+      <div class="field">
+        <label for="solde_initiale">Solde initiale</label>
+        <input type="text" pInputText id="solde_initiale" [(ngModel)]="solde.solde_initiale" required autofocus
+            [ngClass]="{'ng-invalid ng-dirty' :submitted && !solde.solde_initiale}" />
+      </div>
+      <div class="field">
+        <label for="conge_requis">Solde pris</label>
+        <input type="text" pInputText id="conge_requis" [(ngModel)]="solde.conge_requis" required autofocus
+            [ngClass]="{'ng-invalid ng-dirty' :submitted && !solde.conge_requis}" />
+      </div>
+    </ng-template>
+    <ng-template pTemplate="footer">
+      <button pButton pRipple label="Annuler" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+      <button pButton pRipple label="Enregistrer" icon="pi pi-check" class="p-button-text" (click)="addType()"></button>
+    </ng-template>
+  </p-dialog>
+</div>
+
+<div *ngIf="savoirDialog">
+  <p-dialog [(visible)]="savoirDialog" [style]="{width: '600px',height:'600px'}"
+    header="Afficher les soldes des années précedentes" [modal]="true" class="p-fluid">
+    <div class="card px-4 py-4">
+      <div class="field">
+        <label for="Annee">Année</label>
+        <p-dropdown (onChange)="changeAnnee($event)" [options]="annees" placeholder="Sélectionner une année"
+          [showClear]="true" optionLabel="annee" optionValue="annee"></p-dropdown>
+      </div>
+      <div *ngIf="verif==true" class="field">
+        <label for="cloture">Clôturer</label>
+        <br>
+        <input pInputText [(ngModel)]="Cloturer" disabled/>
+      </div>
+    <div *ngIf="anneeDialog">
+        <p-table #dt [value]="userSelected" responsiveLayout="scroll" [rows]="5" [paginator]="true"
+          [rowsPerPageOptions]="[5,10,15]" [showCurrentPageReport]="true" [globalFilterFields]="['annee']"
+          currentPageReportTemplate="Affichage de {first} à {last} des entrées {totalRecords}" [rowHover]="true">
+          <ng-template pTemplate="header">
+            <tr>
+              <th pSortableColumn="type_nom_conge">Type congé<p-sortIcon field="type_nom_conge"></p-sortIcon></th>
+              <th pSortableColumn="solde">Solde<p-sortIcon field="solde"></p-sortIcon></th>
+              <th pSortableColumn="solde_initiale">Solde initiale<p-sortIcon field="solde_initiale"></p-sortIcon></th>
+              <th pSortableColumn="conge_pris">Solde pris<p-sortIcon field="conge_pris"></p-sortIcon></th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-solde>
+            <tr>
+              <td style="width:14%; min-width:9rem;"><span class="p-column-title">Type congé</span>
+                {{solde.type_conge.type_nom_conge}}
+              </td>
+              <td style="width:14%; min-width:6rem;"><span class="p-column-title">Solde</span>
+                {{solde.solde}}
+              </td>
+              <td style="width:14%; min-width:7rem;"><span class="p-column-title">Solde initiale</span>
+                {{solde.solde_initiale}}
+              </td>
+              <td style="width:14%; min-width:6rem;"><span class="p-column-title">Solde pris</span>
+                {{solde.conge_pris}}
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+    </div>
+    <ng-template pTemplate="footer">
+      <button pButton pRipple label="Annuler" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+    </ng-template>
+  </p-dialog>
+</div>
+
+<div *ngIf="soldeDialogEdit">
+  <p-dialog [(visible)]="soldeDialogEdit" [style]="{width: '450px'}" header="Modifier solde" [modal]="true"
+    class="p-fluid">
+    <ng-template pTemplate="content">
+      <div class="field">
+        <label for="type_conges">Type congé</label>
+        <p-dropdown (onChange)="changeType($event)" [(ngModel)]="selectedTypeCongeEdit" [options]="typesConges"
+          placeholder="Sélectionner un type congé" [showClear]="true" optionLabel="type_nom_conge"
+          optionValue="id"></p-dropdown>
+      </div>
+      <div class="field">
+        <label for="duree">Durée</label>
+        <input type="text" pInputText id="dureeEdit" (change)="calculerSolde($event)" [(ngModel)]="dureeEdit" />
+      </div>
+      <div class="field">
+        <label for="solde">Solde</label>
+        <input type="text" pInputText id="solde" [(ngModel)]="tempSolde.solde" />
+      </div>
+      <div class="field">
+        <label for="solde_initiale">Solde initiale</label>
+        <input type="text" pInputText id="solde_initiale" [(ngModel)]="tempSolde.solde_initiale"  />
+      </div>
+      <div class="field">
+        <label for="conge_pris">Solde pris</label>
+        <input type="text" pInputText id="conge_pris" [(ngModel)]="tempSolde.conge_pris"  />
+      </div>
+    </ng-template>
+    <ng-template pTemplate="footer">
+      <button pButton pRipple label="Annuler" icon="pi pi-times" class="p-button-text"
+        (click)="hideDialogEditNouvelleAnnee()"></button>
+      <button pButton pRipple label="Enregistrer" icon="pi pi-check" class="p-button-text"
+        (click)="updateSolde()"></button>
+    </ng-template>
+  </p-dialog>
+</div>
+
+
+<div *ngIf="soldeDialogCloture">
+    <p-dialog [(visible)]="soldeDialogCloture" [style]="{width: '650px',height:'650px'}" header="Les soldes de {{name}} de l'année : {{lastYear}}" [modal]="true"
+    class="p-fluid">
+    <div class="card px-4 py-4">
+      <p-table #dt [value]="anneeSelected" responsiveLayout="scroll" [rows]="5" [paginator]="true"
+        [rowsPerPageOptions]="[5,10,15]" [showCurrentPageReport]="true"
+        [globalFilterFields]="['type_conge.type_nom_conge']"
+        currentPageReportTemplate="Affichage de {first} à {last} des entrées {totalRecords}" [rowHover]="true">
+        <ng-template pTemplate="caption">
+          <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
+            <span class="block mt-5 md:mt-0 p-input-icon-left">
+              <i class="pi pi-search"></i>
+              <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Chercher..."
+                class="w-full sm:w-auto" />
+            </span>
+          </div>
+        </ng-template>
+        <ng-template pTemplate="header">
+          <tr>
+            <th pSortableColumn="type_conge.type_nom_conge">Type congé<p-sortIcon field="type_nom_conge"></p-sortIcon>
+            </th>
+            <th pSortableColumn="duree">Durée<p-sortIcon field="duree"></p-sortIcon></th>
+            <th pSortableColumn="solde">Solde<p-sortIcon field="solde"></p-sortIcon></th>
+            <th pSortableColumn="solde_initiale">Solde initiale<p-sortIcon field="solde_initiale"></p-sortIcon></th>
+            <th pSortableColumn="conge_pris">Solde pris<p-sortIcon field="conge_pris"></p-sortIcon></th>
+            <th>Action</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-solde>
+          <tr>
+            <td style="width:14%; min-width:8rem;"><span class="p-column-title">Type congé</span>
+              {{solde.type_conge.type_nom_conge}}
+            </td>
+            <td style="width:14%; min-width:6rem;"><span class="p-column-title">Durée</span>
+              {{solde.duree}}
+            </td>
+            <td style="width:14%; min-width:6rem;"><span class="p-column-title">Solde</span>
+              {{solde.solde}}
+            </td>
+            <td style="width:14%; min-width:6rem;"><span class="p-column-title">Solde initiale</span>
+              {{solde.solde_initiale}}
+            </td>
+            <td style="width:14%; min-width:6rem;"><span class="p-column-title">Solde pris</span>
+              {{solde.conge_pris}}
+            </td>
+
+            <td>
+            <div class="flex flex-wrap gap-2">
+              <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2"
+                (click)="getSolde(solde)"></button>
+            </div>
+          </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="footer">
+          <tr>
+            <td>Somme</td>
+            <td>{{totalDuree}}</td>
+            <td>{{totalSolde}}</td>
+            <td>{{totalSoldeInitiale}}</td>
+            <td>{{totalSoldeRequis}}</td>
+            <td></td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+    <ng-template pTemplate="footer">
+ <button pButton pRipple label="Annuler" icon="pi pi-times" class="p-button-text"
+    (click)="hideDialogEdit()"></button>
+    </ng-template>
+</p-dialog>

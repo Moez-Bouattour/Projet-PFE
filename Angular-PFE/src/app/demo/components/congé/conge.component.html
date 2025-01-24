@@ -1,0 +1,304 @@
+<div class="card px-5 py-5">
+  <p-toast></p-toast>
+  <p-toolbar styleClass="mb-2">
+    <ng-template pTemplate="left">
+      <div class="my-2">
+        <button pButton pRipple label="Ajouter" icon="pi pi-plus" class="p-button-success mr-2"
+          (click)="openNew()"></button>
+      </div>
+      <div class="my-2">
+        <button pButton pRipple type="button" label="Voir solde" class="p-button-warning" (click)="openSoldeDialog()"></button>
+          </div>
+          <span>&nbsp;&nbsp;</span>
+        <div class="my-2">
+        <button *ngIf="isRH()" pButton pRipple label="Calendrier" icon="pi pi-calendar"
+        (click)="openCalendarDialog()">
+      </button>
+        </div>
+    </ng-template>
+  </p-toolbar>
+  <p-table #dt [value]="conges" responsiveLayout="scroll" [rows]="5" [paginator]="true" [rowsPerPageOptions]="[5,10,15]"
+    [showCurrentPageReport]="true" [globalFilterFields]="['users.name','type_conges.type_nom_conge','lastHistorique.Nom_Niveau','lastHistorique.Nom_etat']"
+    currentPageReportTemplate="Affichage de {first} à {last} des entrées {totalRecords}" [rowHover]="true">
+    <ng-template pTemplate="caption">
+      <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
+        <h5 class="m-0">Gère les demandes de congés</h5>
+        <span class="block mt-5 md:mt-0 p-input-icon-left">
+          <i class="pi pi-search"></i>
+          <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Chercher..."
+            class="w-full sm:w-auto" />
+        </span>
+      </div>
+    </ng-template>
+    <ng-template pTemplate="header">
+      <tr>
+        <th pSortableColumn="id">Code<p-sortIcon field="id"></p-sortIcon></th>
+        <th pSortableColumn="users.name">Nom utilisateur<p-sortIcon field="name"></p-sortIcon></th>
+        <th pSortableColumn="type_conges.type_nom_conge">Type congé<p-sortIcon field="type_conge"></p-sortIcon></th>
+        <th pSortableColumn="date_debut_conge">Date début <p-sortIcon field="date_debut_conge"></p-sortIcon></th>
+        <th pSortableColumn="date_fin_conge">Date reprise<p-sortIcon field="date_fin_conge"></p-sortIcon></th>
+        <th pSortableColumn="duree">Durée<p-sortIcon field="duree"></p-sortIcon></th>
+        <th pSortableColumn="solde">Solde<p-sortIcon field="solde"></p-sortIcon></th>
+        <th pSortableColumn="justification_medicale">Justification médicale<p-sortIcon
+            field="justification_medicale"></p-sortIcon></th>
+        <th pSortableColumn="lastHistorique.Nom_Niveau">Nom niveau<p-sortIcon field="Nom_niveau"></p-sortIcon></th>
+        <th pSortableColumn="lastHistorique.Nom_etat">Nom état<p-sortIcon field="Nom_etat"></p-sortIcon></th>
+        <th>Action</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-conge>
+      <tr [style.background-color]="conge.lastHistorique.etats.couleur">
+        <td style="width:14%; min-width:5rem;"><span class="p-column-title">Code</span>
+          {{conge.id}}
+        </td>
+        <td style="width:14%; min-width:6rem;"><span class="p-column-title">Nom utilisateur</span>
+          {{conge.users.name}}
+        </td>
+        <td style="width:14%; min-width:6rem;"><span class="p-column-title">Type congé</span>
+          {{conge.type_conges.type_nom_conge }}
+        </td>
+        <td style="width:14%; min-width:7rem;"><span class="p-column-title">Date début</span>
+          {{conge.date_debut_conge}}
+        </td>
+        <td style="width:14%; min-width:7rem;"><span class="p-column-title">Date reprise</span>
+          {{conge.date_fin_conge}}
+        </td>
+        <td style="width:14%; min-width:5rem;"><span class="p-column-title">Durée</span>
+          {{ getDuree(conge) }}
+        </td>
+        <td style="width:14%; min-width:5rem;"><span class="p-column-title">Solde</span>
+          {{ get(conge) }}
+        </td>
+
+        <td style="width:14%; min-width:5rem;"><span class="p-column-title">Justification médicale</span>
+          <p-image [src]="'http://127.0.0.1:8000'+conge.justification_medicale" width="100" [preview]="true"></p-image>
+        </td>
+        <td style="width:14%; min-width:7rem;">
+          <button pButton pRipple type="button" [label]="conge.lastHistorique.Nom_Niveau"
+            class="p-button-secondary p-button-text"></button>
+        </td>
+        <td style="width:14%; min-width:8rem;">
+          <button pButton pRipple type="button" [label]="conge.lastHistorique.Nom_etat"
+            class="p-button-secondary p-button-text" (click)="openEtatDialog(conge.id)"></button>
+        </td>
+        <td>
+          <div *ngIf="conge.lastHistorique.Nom_Niveau==poste && conge.lastHistorique.Nom_etat=='en attente'" class="flex flex-wrap gap-2" >
+            <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2"
+              (click)="getConge(conge.id)"></button>
+          </div>
+          <div *ngIf="conge.lastHistorique.Nom_Niveau =='RH' && conge.lastHistorique.Nom_etat == 'accepté'" class="flex flex-wrap gap-2">
+            <button pButton pRipple type="button" icon="pi pi-print" class=" p-button-rounded p-button-danger mr-2" (click)="imprimerDemande(conge)"></button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<div *ngIf="congeDialogAdd">
+  <p-dialog [(visible)]="congeDialogAdd" header="" [modal]="true" [style]="{width: '900px','height': '800px'}"
+    class="p-fluid" [formGroup]="congeForm">
+    <p-header>
+      <div class="flex justify-content-between" style="align-items: center;">
+        <h4 class="p-m-0" style="margin: 0;">Ajouter demande de congé</h4>
+        <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+        <p-button label="Solde congé :" badge="{{solde}}"></p-button>
+      </div>
+    </p-header>
+
+    <div class="card">
+      <div class="p-fluid p-formgrid grid">
+        <div class="field col-12 md:col-6">
+          <label htmlFor="name2">Date début </label>
+          <p-calendar formControlName="date_debut_conge" [showIcon]="true" inputId="date_debut_conge" required autofocus
+            (ngModelChange)="onDateChange(); getSolde()"></p-calendar>
+          <small class="ng-dirty ng-invalid"
+            *ngIf="submitted && congeForm.get('date_debut_conge')?.hasError('required')">La date de début du congé est
+            requise.</small>
+        </div>
+        <div class="field col-12 md:col-6">
+          <label htmlFor="name2">Date reprise</label>
+          <p-calendar formControlName="date_fin_conge" [showIcon]="true" inputId="date_fin_conge" required autofocus
+            (ngModelChange)="onDateChange(); getSolde()" locale="fr"></p-calendar>
+          <small class="ng-dirty ng-invalid"
+            *ngIf="submitted && congeForm.get('date_fin_conge')?.hasError('required')">La date de fin du congé est
+            requise.</small>
+        </div>
+
+        <div class="field col-12 md:col-6">
+          <label htmlFor="name2">Type congé</label>
+          <p-dropdown formControlName="id_type_conge" [options]="typesconges"
+            placeholder="Sélectionner un type de congé" [showClear]="true" optionLabel="type_nom_conge" optionValue="id"
+            required autofocus
+            [ngClass]="{'ng-invalid ng-dirty' :submitted && congeForm.get('id_type_conge')?.hasError('required')}"
+            (ngModelChange)="getSolde()"></p-dropdown>
+          <small class="ng-dirty ng-invalid"
+            *ngIf="submitted && congeForm.get('id_type_conge')?.hasError('required')">type de congé est requis.</small>
+        </div>
+        <div class="field col-12 md:col-6" *ngIf="isMaladieSelected()">
+          <div class="form-group">
+            <label for="justification_medicale">Justification médicale</label>
+            <p-fileUpload mode="basic" accept="image/*" [maxFileSize]="1000000" label="Import" chooseLabel="Import"
+              class="mr-2 inline-block" (onSelect)="onFileSelected($event)"></p-fileUpload>
+          </div>
+        </div>
+        <div class="field col-12 md:col-6">
+          <label htmlFor="name2">Durée (en jours)</label>
+          <input formControlName="duree" pInputText id="duree" type="number" />
+        </div>
+      </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+      <button pButton pRipple type="button" label="Annuler" icon="pi pi-times" class="p-button-text"
+        (click)="hideDialog()"></button>
+      <button pButton pRipple type="submit" label="Enregistrer" icon="pi pi-check" class="p-button-text"
+        (click)="addConge()"></button>
+    </ng-template>
+    <div class="p-formgrid grid">
+      <div class="col-12 mb-2 lg:col-4 lg:mb-0">
+        <label htmlFor="Nom_Niveau">Nom niveau</label>
+        <input pInputText id="Nom_Niveau" [value]="congeForm.get('Nom_Niveau').value" disabled />
+      </div>
+      <div class="col-12 mb-2 lg:col-4 lg:mb-0">
+        <label htmlFor="Nom_etat">Nom état</label>
+        <input pInputText id="Nom_etat" [value]="congeForm.get('Nom_etat').value" disabled />
+      </div>
+    </div>
+  </p-dialog>
+</div>
+<div *ngIf="congeDialogEdit">
+  <p-dialog [(visible)]="congeDialogEdit" header="" [modal]="true" [style]="{width: '900px','height': '800px'}"
+    class="p-fluid" [formGroup]="congeFormEdit">
+    <p-header>
+      <div class="flex justify-content-between" style="align-items: center;">
+        <h4 class="p-m-0" style="margin: 0;">Modifier demande de congé</h4>
+        <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>        <p-button label="Solde congé" badge="{{solde}}"></p-button>
+      </div>
+    </p-header>
+
+    <div class="card">
+      <div class="p-fluid p-formgrid grid">
+        <div class="field col-12 md:col-6">
+          <label htmlFor="name2">Date début</label>
+          <p-calendar formControlName="date_debut_conge" [showIcon]="true" inputId="date_debut_conge" required autofocus
+            (ngModelChange)="onDateChange()"></p-calendar>
+          <small class="ng-dirty ng-invalid"
+            *ngIf="submitted && congeFormEdit.get('date_debut_conge')?.hasError('required')">La date de début du congé est
+            requise.</small>
+        </div>
+        <div class="field col-12 md:col-6">
+          <label htmlFor="name2">Date reprise</label>
+          <p-calendar formControlName="date_fin_conge" [showIcon]="true" inputId="date_fin_conge" required autofocus
+            (ngModelChange)="onDateChange(); getSoldeEdit()" locale="fr"></p-calendar>
+          <small class="ng-dirty ng-invalid"
+            *ngIf="submitted && congeFormEdit.get('date_fin_conge')?.hasError('required')">La date de fin du congé est
+            requise.</small>
+        </div>
+
+        <div class="field col-12 md:col-6">
+          <label htmlFor="name2">Type congé</label>
+          <p-dropdown formControlName="id_type_conge" [options]="typesconges"
+            placeholder="Sélectionner un type de congé" [showClear]="true" optionLabel="type_nom_conge" optionValue="type_nom_conge"
+            required autofocus
+            [ngClass]="{'ng-invalid ng-dirty' :submitted && congeFormEdit.get('id_type_conge')?.hasError('required')}"
+            (ngModelChange)=" getSoldeEdit()"></p-dropdown>
+          <small class="ng-dirty ng-invalid"
+            *ngIf="submitted && congeFormEdit.get('id_type_conge')?.hasError('required')">type de congé est requis.</small>
+        </div>
+        <div class="field col-12 md:col-6" *ngIf="isMaladieSelected()">
+          <div class="form-group">
+            <label for="justification_medicale">Justification médicale</label>
+            <p-fileUpload mode="basic" accept="image/*" [maxFileSize]="1000000" label="Import" chooseLabel="Import"
+              class="mr-2 inline-block" (onSelect)="onFileSelected($event)"></p-fileUpload>
+          </div>
+        </div>
+        <div class="field col-12 md:col-6">
+          <label htmlFor="name2">Durée (en jours)</label>
+          <input formControlName="duree" pInputText id="duree" type="number" />
+        </div>
+      </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+      <button pButton pRipple type="button" label="Annuler" icon="pi pi-times" class="p-button-text"
+        (click)="hideDialog()"></button>
+      <button pButton pRipple type="submit" label="Enregistrer" icon="pi pi-check" class="p-button-text"
+        (click)="updateConge()"></button>
+    </ng-template>
+    <div class="p-formgrid grid">
+      <div class="col-12 mb-2 lg:col-4 lg:mb-0">
+        <label htmlFor="Nom_Niveau">Nom niveau</label>
+        <input pInputText id="Nom_Niveau" [value]="congeFormEdit.get('Nom_Niveau').value" disabled />
+      </div>
+      <div class="col-12 mb-2 lg:col-4 lg:mb-0">
+        <label htmlFor="Nom_etat">Nom état</label>
+        <input pInputText id="Nom_etat" [value]="congeFormEdit.get('Nom_etat').value" disabled />
+      </div>
+    </div>
+  </p-dialog>
+</div>
+<div *ngIf="etatDialog">
+  <p-dialog [(visible)]="etatDialog" [style]="{width: '450px','height': '500px'}" header="Modifier Etat" [modal]="true"
+    class="p-fluid">
+    <ng-template pTemplate="content">
+      <div class="field">
+        <label for="Nom_etat">Nom état</label>
+        <p-dropdown [(ngModel)]="selectedNomEtat" [options]="etats" placeholder="Sélectionner un etat"
+          [showClear]="true" optionLabel="Nom_etat" optionValue="Nom_etat"></p-dropdown>
+      </div>
+    </ng-template>
+    <ng-template pTemplate="footer">
+      <button pButton type="button" label="Annuler" icon="pi pi-times" class="p-button-text"
+        (click)="hideDialog()"></button>
+      <button pButton type="button" label="Enregistrer" icon="pi pi-check" class="p-button-text"
+        (click)="updateEtat()"></button>
+    </ng-template>
+  </p-dialog>
+</div>
+  <!-- Calendrier -->
+<div *ngIf="calendarDialogVisible">
+  <p-dialog header="Calendrier des demandes de congés acceptées" [(visible)]="calendarDialogVisible" [modal]="true"
+    [style]="{ width: '1000px','height': '700px' }">
+    <full-calendar [options]="calendarOptions" [style]="{ width: '900px','height': '700px' }" (dateClick)="handleCalendarDateClick($event)"></full-calendar>
+    <ng-template pTemplate="footer">
+      <button pButton pRipple type="button" label="Fermer" icon="pi pi-times" class="p-button-text"
+        (click)="closeCalendarDialog()"></button>
+    </ng-template>
+  </p-dialog>
+</div>
+
+<div *ngIf="eventDialogVisible">
+  <p-dialog header="Détails de la demande de congé" [(visible)]="eventDialogVisible">
+    <ng-template pTemplate="content">
+      <div class="card">
+      <p><strong>Nom utilisateur: </strong> {{ selectedConge.users.name }}</p>
+      <p><strong>Département utilisateur: </strong> {{ selectedConge.users.departement }}</p>
+      <p><strong>Poste utilisateur:</strong> {{ selectedConge.users.poste }}</p>
+      <p><strong>Type congé: </strong> {{ selectedConge.type_conges.type_nom_conge }}</p>
+      <p><strong>Date début: </strong> {{ selectedConge.date_debut_conge }}</p>
+      <p><strong>Date reprise: </strong> {{ selectedConge.date_fin_conge }}</p>
+      </div>
+    </ng-template>
+    <ng-template pTemplate="footer">
+      <button pButton pRipple type="button" label="Fermer" icon="pi pi-times" class="p-button-text"
+        (click)="closeeventDialog()"></button>
+    </ng-template>
+  </p-dialog>
+</div>
+
+
+
+<div *ngIf="VoirsoldeDialog">
+  <p-dialog header="" [(visible)]="VoirsoldeDialog" [modal]="true" [style]="{width: '450px','height': '500px'}">
+    <h4>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Solde congé total de l'année 2025</h4>
+    <div class=" flex justify-content-center">
+      <p-chart type="pie" [data]="data" [options]="options"></p-chart>
+    </div>
+    <ng-template pTemplate="footer">
+      <button pButton pRipple type="button" label="Fermer" icon="pi pi-times" class="p-button-text"
+        (click)="closevoirsoldeDialog()"></button>
+    </ng-template>
+
+  </p-dialog>
+  </div>

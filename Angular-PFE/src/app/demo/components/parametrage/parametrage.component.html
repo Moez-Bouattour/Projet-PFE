@@ -1,0 +1,14 @@
+<div class="grid">
+  <div class="col-12 xl:col-6">
+    <app-type-document [typedocuments]="typedocuments" (typedocumentSelected)="onChildTypeDocument($event)"
+      (closeDialogNiveau)="closeNiveauDialog()"></app-type-document>
+  </div>
+  <div class="col-12 xl:col-6">
+    <app-niveau [typeDocumentSelected]="typeDocumentSelected" *ngIf="niveauDialog"
+      (niveauSelected)="onChildNiveau($event)" (niveauApprobateurSelected)=" onChildApprobateur($event)"
+      (closeDialogEtat)="closeEtatDialog()"></app-niveau>
+    <app-etat [niveauSelected]="niveauSelected" *ngIf="etatDialog"></app-etat>
+    <app-approbateur [niveauApprobateurSelected]="niveauApprobateurSelected" [approbateurDialog]="approbateurDialog"
+      (closeDialog)="closeApprobateurDialog()"></app-approbateur>
+</div>
+</div>

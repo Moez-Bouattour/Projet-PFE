@@ -1,0 +1,34 @@
+<div class="grid">
+  <div class="col-12 md:col-6">
+    <div style="text-align: center; width: 50%;">
+      <p-avatar icon="pi pi-user" pBadge severity="success" size="xlarge"></p-avatar>
+      <h4>Informations professionnelles</h4>
+      <p-scrollPanel [style]="{width: '250px', height: '200px'}">
+        <p>Informations sur votre fonction </p>
+      </p-scrollPanel>
+    </div>
+  </div>
+  <div class="grid" style="display: flex; justify-content: center; margin-top: 20px;">
+    <div class="col-12 md:col-12">
+      <div class="card p-fluid"
+        style="width: 100%; max-width: 400px; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+        <p-toolbar>
+          <div style="text-align: center; width: 100%;">
+            <h5>{{name}}</h5>
+            <h6>{{poste}}</h6>
+          </div>
+          <div class="field" style="width: 60%;">
+            <label htmlFor="name1" style="margin-bottom: 5px;">Nom de chef de projet</label>
+            <input pInputText id="name1" value="{{chefDeProjetNom}}" disabled
+              style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+          </div>
+          <div class="field" style="width: 60%;">
+            <label htmlFor="email1" style="margin-bottom: 5px;">Email</label>
+            <input pInputText id="email1" value="{{email}}" disabled
+              style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+          </div>
+        </p-toolbar>
+      </div>
+    </div>
+  </div>
+</div>

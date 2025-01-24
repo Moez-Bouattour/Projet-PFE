@@ -1,0 +1,257 @@
+<div class="card px-5 py-5">
+  <p-toast></p-toast>
+  <p-toolbar styleClass="mb-2">
+    <ng-template pTemplate="left">
+      <div class="my-2">
+        <button pButton pRipple label="Ajouter" icon="pi pi-plus" class="p-button-success mr-2"
+          (click)="openNew()"></button>
+      </div>
+    </ng-template>
+  </p-toolbar>
+  <p-table #dt [value]="users" responsiveLayout="scroll" [rows]="5" [paginator]="true" [rowsPerPageOptions]="[5,10,15]"
+    [showCurrentPageReport]="true" [globalFilterFields]="['departement','name','poste']" currentPageReportTemplate="Affichage de {first} à {last} des entrées {totalRecords}"
+    [rowHover]="true">
+    <ng-template pTemplate="caption">
+      <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
+        <h5 class="m-0">Gère les employés</h5>
+        <span class="block mt-5 md:mt-0 p-input-icon-left">
+          <i class="pi pi-search"></i>
+          <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Chercher..."
+            class="w-full sm:w-auto" />
+        </span>
+      </div>
+    </ng-template>
+    <ng-template pTemplate="header">
+      <tr>
+        <th pSortableColumn="id">Code<p-sortIcon field="id"></p-sortIcon></th>
+        <th pSortableColumn="name">Nom & Prénom<p-sortIcon field="name"></p-sortIcon></th>
+        <th pSortableColumn="sexe">Genre<p-sortIcon field="sexe"></p-sortIcon></th>
+        <th pSortableColumn="situation">Situation<p-sortIcon field="situation"></p-sortIcon></th>
+        <th pSortableColumn="telephone">Téléphone<p-sortIcon field="telephone"></p-sortIcon></th>
+        <th pSortableColumn="cin">CIN<p-sortIcon field="cin"></p-sortIcon></th>
+        <th pSortableColumn="ville">Ville<p-sortIcon field="ville"></p-sortIcon></th>
+        <th pSortableColumn="email">Email<p-sortIcon field="email"></p-sortIcon></th>
+        <th pSortableColumn="date_embauche">Date d'embauche<p-sortIcon field="date_embauche"></p-sortIcon></th>
+        <th pSortableColumn="poste">Poste<p-sortIcon field="poste"></p-sortIcon></th>
+        <th pSortableColumn="departement">Département<p-sortIcon field="departement"></p-sortIcon></th>
+        <th>Action</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-user >
+      <tr>
+          <td style="width:14%; min-width:5rem;"><span class="p-column-title">Code</span>
+            {{user.id}}
+          </td>
+          <td style="width:14%; min-width:9rem;"><span class="p-column-title">Nom & Prénom</span>
+            {{user.name}}
+          </td>
+          <td style="width:14%; min-width:6rem;"><span class="p-column-title">Genre</span>
+            {{user.sexe}}
+          </td>
+          <td style="width:14%; min-width:6rem;"><span class="p-column-title">Situation</span>
+            {{user.situation}}
+          </td>
+          <td style="width:14%; min-width:6rem;"><span class="p-column-title">Téléphone</span>
+            {{user.telephone}}
+          </td>
+          <td style="width:14%; min-width:6rem;"><span class="p-column-title">CIN</span>
+            {{user.cin}}
+          </td>
+          <td style="width:14%; min-width:6rem;"><span class="p-column-title">Ville</span>
+            {{user.ville}}
+          </td>
+          <td style="width:14%; min-width:7rem;"><span class="p-column-title">Email</span>
+            {{user.email}}
+          </td>
+          <td style="width:14%; min-width:8rem;"><span class="p-column-title">Date d'embauche</span>
+            {{user.date_embauche}}
+          </td>
+          <td style="width:14%; min-width:7rem;"><span class="p-column-title">Poste</span>
+            {{user.poste}}
+          </td>
+          <td style="width:14%; min-width:7rem;"><span class="p-column-title">Département</span>
+            {{user.departement}}
+          </td>
+          <td>
+          <div class="flex flex-wrap gap-2" style="width:14%; min-width:7rem;">
+            <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2"
+              (click)="getUser(user.id)"></button>
+            <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-warning"
+              (click)="deleteUser(user)"></button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+<div *ngIf="userDialogAdd">
+  <p-dialog [(visible)]="userDialogAdd" header="Ajouter employé" [modal]="true"
+    [style]="{width: '900px','height': '700px'}" class="p-fluid" [formGroup]="userForm">
+    <div class="col-12">
+      <div class="card">
+        <div class="p-fluid p-formgrid grid">
+          <div class="field col-12 md:col-6">
+            <label for="name">Nom & Prénom</label>
+            <input formControlName="name" pInputText id="name" type="text" required autofocus [ngClass]="{'ng-invalid ng-dirty' :submitted && userForm.get('name')?.hasError('required')}" />
+            <small class="ng-dirty ng-invalid" *ngIf="submitted && userForm.get('name')?.hasError('required')">
+              Le nom & prénom sont requis.
+            </small>
+          </div>
+          <div class="field col-12 md:col-6">
+            <label for="sexe">Genre</label>
+            <input formControlName="sexe" pInputText id="sexe" type="text" required autofocus [ngClass]="{'ng-invalid ng-dirty' :submitted && userForm.get('sexe')?.hasError('required')}" />
+            <small class="ng-dirty ng-invalid" *ngIf="submitted && userForm.get('sexe')?.hasError('required')">
+              Le genre est requis.
+            </small>
+          </div>
+          <div class="field col-12 md:col-6">
+            <label for="situation">Situation</label>
+            <input formControlName="situation" pInputText id="situation" type="text" required autofocus [ngClass]="{'ng-invalid ng-dirty' :submitted && userForm.get('situation')?.hasError('required')}" />
+            <small class="ng-dirty ng-invalid" *ngIf="submitted && userForm.get('situation')?.hasError('required')">
+              Le situation est requis.
+            </small>
+          </div>
+          <div class="field col-12 md:col-6">
+            <label for="telephone">Téléphone</label>
+            <input formControlName="telephone" pInputText id="telephone" type="text" autofocus required [ngClass]="{'ng-invalid ng-dirty' :submitted && userForm.get('telephone')?.hasError('required')}"/>
+            <small class="ng-dirty ng-invalid" *ngIf="submitted && userForm.get('telephone')?.hasError('required')">
+              Veuillez saisir un numéro de téléphone valide de 8 chiffres.
+            </small>
+          </div>
+          <div class="field col-12 md:col-6">
+            <label for="cin">CIN</label>
+            <input formControlName="cin" pInputText id="cin" type="text" autofocus required [ngClass]="{'ng-invalid ng-dirty' :submitted && userForm.get('cin')?.hasError('required')}" />
+            <small class="ng-dirty ng-invalid" *ngIf="submitted && userForm.get('cin')?.hasError('required')">
+              Veuillez saisir un numéro CIN valide de 8 chiffres.
+            </small>
+          </div>
+          <div class="field col-12 md:col-6">
+            <label for="ville">Ville</label>
+            <input formControlName="ville" pInputText id="ville" type="text"  autofocus required [ngClass]="{'ng-invalid ng-dirty' :submitted && userForm.get('ville')?.hasError('required')}" />
+            <small class="ng-dirty ng-invalid" *ngIf="submitted && userForm.get('telephone')?.hasError('required')">
+              Veuillez choisir une ville.
+            </small>
+          </div>
+          <div class="field col-12 md:col-6">
+            <label for="email">Email</label>
+            <input formControlName="email" pInputText id="email" type="email" required autofocus [ngClass]="{'ng-invalid ng-dirty' :submitted && userForm.get('email')?.hasError('required')}"/>
+            <small class="ng-dirty ng-invalid" *ngIf="submitted && userForm.get('email')?.hasError('required')">
+              Le mot de passe est requis et doit contenir au moins 6 caractères.
+            </small>
+          </div>
+          <div class="field col-12 md:col-6">
+            <label for="password">Mot de passe</label>
+            <input formControlName="password" pInputText id="password" type="password" required  autofocus [ngClass]="{'ng-invalid ng-dirty' :submitted && userForm.get('password')?.hasError('required')}" />
+            <small class="ng-dirty ng-invalid" *ngIf="submitted && userForm.get('password')?.hasError('required')">
+              Le mot de passe est requis et doit contenir au moins 6 caractères.
+            </small>
+          </div>
+          <div class="field col-12 md:col-6">
+            <label htmlFor="date_embauche">Date d'embauche</label>
+            <p-calendar [showIcon]="true" id="date_embauche" formControlName="date_embauche" inputId="date_embauche" required autofocus [ngClass]="{'ng-invalid ng-dirty' :submitted && userForm.get('date_embauche')?.hasError('required')}"></p-calendar>
+            <small class="ng-dirty ng-invalid" *ngIf="submitted && userForm.get('date_embauche')?.hasError('required')">Date d'embauche est requis.</small>
+        </div>
+        <div class="field col-12 md:col-6">
+          <label for="poste">Poste</label>
+          <p-dropdown formControlName="poste" [options]="posteOptions" optionLabel="label" optionValue="value" placeholder="Sélectionner"  autofocus required [ngClass]="{'ng-invalid ng-dirty' :submitted && userForm.get('poste')?.hasError('required')}" >
+            <ng-template let-option pTemplate="item">
+              <span>{{option.label}}</span>
+            </ng-template>
+          </p-dropdown>
+          <small class="ng-dirty ng-invalid" *ngIf="submitted && userForm.get('poste')?.hasError('required')">
+            Veuillez choisir une poste
+          </small>
+        </div>
+            <div class="field col-12 md:col-6">
+              <label for="departement">Département</label>
+              <input formControlName="departement" pInputText id="departement" type="text" autofocus required [ngClass]="{'ng-invalid ng-dirty' :submitted && userForm.get('departement')?.hasError('required')}" />
+              <small class="ng-dirty ng-invalid" *ngIf="submitted && userForm.get('departement')?.hasError('required')">
+                Veuillez choisir un département
+              </small>
+            </div>
+          </div>
+        </div>
+      </div>
+    <ng-template pTemplate="footer">
+      <button pButton pRipple type="button" label="Annuler" icon="pi pi-times" class="p-button-text"
+        (click)="hideDialog()"></button>
+      <button pButton pRipple type="submit" label="Enregistrer" icon="pi pi-check" class="p-button-text"
+        (click)="addUser()"></button>
+    </ng-template>
+  </p-dialog>
+</div>
+<div *ngIf="userDialogEdit">
+  <p-dialog [(visible)]="userDialogEdit" header="Modifier employé" [modal]="true"
+    [style]="{width: '900px','height': '700px'}" class="p-fluid" [formGroup]="userFormEdit">
+    <div class="col-12">
+      <div class="card">
+        <div class="p-fluid p-formgrid grid">
+          <div class="field col-12 md:col-6">
+            <label for="name">Nom & Prénom</label>
+            <input formControlName="name" pInputText id="name" type="text" />
+          </div>
+          <div class="field col-12 md:col-6">
+            <label for="sexe">Genre</label>
+            <input formControlName="sexe" pInputText id="sexe" type="text" />
+          </div>
+          <div class="field col-12 md:col-6">
+            <label for="situation">Situation</label>
+            <input formControlName="situation" pInputText id="situation" type="text" />
+          </div>
+          <div class="field col-12 md:col-6">
+            <label for="telephone">Téléphone</label>
+            <input formControlName="telephone" pInputText id="telephone" type="text" />
+          </div>
+          <div class="field col-12 md:col-6">
+            <label for="cin">CIN</label>
+            <input formControlName="cin" pInputText id="cin" type="text" />
+          </div>
+          <div class="field col-12 md:col-6">
+            <label for="ville">Ville</label>
+            <input formControlName="ville" pInputText id="ville" type="text" />
+          </div>
+          <div class="field col-12 md:col-6">
+            <label for="email">Email</label>
+            <input formControlName="email" pInputText id="email" type="email" />
+          </div>
+          <div class="field col-12 md:col-6">
+            <label for="date_embauche">Date d'embauche</label>
+            <p-calendar [showIcon]="true" id="date_embauche" formControlName="date_embauche" inputId="date_embauche" required autofocus [ngClass]="{'ng-invalid ng-dirty' :submitted && userForm.get('date_embauche')?.hasError('required')}"></p-calendar>
+          </div>
+          <div class="field col-12 md:col-6">
+            <label for="poste">Poste</label>
+            <p-dropdown formControlName="poste" [options]="posteOptions" optionLabel="label" optionValue="value" placeholder="Sélectionner">
+              <ng-template let-option pTemplate="item">
+                <span>{{option.label}}</span>
+              </ng-template>
+            </p-dropdown>
+          </div>
+          <div class="field col-12 md:col-6">
+            <label for="departement">Département</label>
+            <input formControlName="departement" pInputText id="departement" type="text" />
+          </div>
+        </div>
+      </div>
+    </div>
+    <ng-template pTemplate="footer">
+      <button pButton pRipple type="button" label="Annuler" icon="pi pi-times" class="p-button-text"
+        (click)="hideDialog()"></button>
+      <button pButton pRipple type="submit" label="Enregistrer" icon="pi pi-check" class="p-button-text"
+        (click)="updateUser()"></button>
+    </ng-template>
+  </p-dialog>
+</div>
+
+<div *ngIf="deleteUserDialog">
+  <p-dialog [(visible)]="deleteUserDialog" header="Confirmer" [modal]="true" [style]="{width:'450px'}">
+    <div class="flex align-items-center justify-content-center">
+      <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
+      <span *ngIf="user">Êtes-vous sûr de vouloir supprimer <b>{{user.name}}</b>?</span>
+    </div>
+    <ng-template pTemplate="footer">
+      <button pButton pRipple icon="pi pi-times" class="p-button-text" label="Non"
+        (click)="deleteUserDialog = false"></button>
+      <button pButton pRipple icon="pi pi-check" class="p-button-text" label="Oui" (click)="confirmDelete()"></button>
+    </ng-template>
+  </p-dialog>
+</div>

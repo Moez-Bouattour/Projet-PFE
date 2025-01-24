@@ -1,0 +1,173 @@
+<div class="grid p-fluid">
+    <div class="col-12 lg:col-6 xl:col-4">
+      <ng-container *ngFor="let jourFerie of jourferies">
+        <div class="card mb-3" *ngIf="isCurrentMonth(jourFerie.date)">
+          <div class="flex justify-content-between mb-3">
+            <div>
+              <span class="block text-500 font-medium mb-3">Jour Férié</span>
+              <div class="text-900 font-medium text-xl">{{ jourFerie.evenement }}</div>
+            </div>
+            <div class="flex align-items-center justify-content-center bg-blue-100 border-round" [ngStyle]="{width: '2.5rem', height: '2.5rem'}">
+              <i class="pi pi-calendar text-blue-500 text-xl"></i>
+            </div>
+          </div>
+          <span class="text-green-500 font-medium">Date: </span>
+          <span class="text-500">{{ jourFerie.date }}</span>
+        </div>
+      </ng-container>
+    </div>
+    <div class="col-12 md:col-8">
+      <div class="card">
+  <p-toast></p-toast>
+  <p-toolbar styleClass="mb-2">
+      <ng-template pTemplate="left">
+        <div class="my-2">
+          <button pButton pRipple label="Ajouter" icon="pi pi-plus" class="p-button-success mr-2"
+            (click)="openNew()"></button>
+            </div>
+      </ng-template>
+      <ng-template pTemplate="right">
+        <button pButton pRipple type="button" icon="pi pi-cog" label="week-end" class="p-button-help" (click)="openWeekendSettingsDialog()"></button>
+      </ng-template>
+
+    </p-toolbar>
+<p-table #dt [value]="jourferies"  responsiveLayout="scroll" [rows]="5"
+[globalFilterFields]="['date','evenement']" [paginator]="true" [rowsPerPageOptions]="[5,10,15]"
+[showCurrentPageReport]="true" currentPageReportTemplate="Affichage de {first} à {last} des entrées {totalRecords}"
+[rowHover]="true">
+<ng-template pTemplate="caption">
+  <div class="flex flex-row justify-content-between items-center">
+    <div class="w-full">
+      <h5 class="m-1">Gère les jours fériés </h5>
+    </div>
+    <div class="block mt-5 md:mt-0 p-input-icon-right text-right">
+      <i class="pi pi-search"></i>
+      <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Chercher..." class="w-full sm:w-auto" />
+    </div>
+  </div>
+</ng-template>
+
+
+<ng-template pTemplate="header">
+<tr>
+  <th pSortableColumn="date">Date<p-sortIcon field="date"></p-sortIcon></th>
+  <th pSortableColumn="evenement">Evénement<p-sortIcon field="evenement"></p-sortIcon></th>
+  <th>Action</th>
+</tr>
+</ng-template>
+<ng-template pTemplate="body" let-jourferie>
+<tr>
+  <td style="width:15%; min-width:9rem;">
+    <span class="p-column-title">Date</span>
+    {{jourferie.date}}
+  </td>
+  <td style="width:15%; min-width:9rem;">
+      <span class="p-column-title">Evénement</span>
+      {{jourferie.evenement}}
+    </td>
+  <td>
+    <div class="flex flex-wrap gap-2">
+      <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2"
+        (click)="getJourferie(jourferie.id)"></button>
+      <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-warning"
+        (click)="deleteJourferie(jourferie)"></button>
+    </div>
+  </td>
+</tr>
+</ng-template>
+</p-table>
+</div>
+</div>
+
+  <div *ngIf="jourferieDialogAdd">
+      <p-dialog [(visible)]="jourferieDialogAdd" [style]="{width: '500px',height:'600px'}" header="Ajouter jour férié" [modal]="true"
+        class="p-fluid" [formGroup]="jourferieForm" >
+          <div class="card">
+              <div class="p-fluid p-formgrid grid">
+                  <div class="field col-12 md:col-8">
+                      <label htmlFor="lastname2">Date</label>
+                      <p-calendar [showIcon]="true" id="date" formControlName="date" inputId="date" required autofocus [ngClass]="{'ng-invalid ng-dirty' :submitted && jourferieForm.get('date')?.hasError('required')}"></p-calendar>
+                      <small class="ng-dirty ng-invalid" *ngIf="submitted && jourferieForm.get('date')?.hasError('required')">Date est requis.</small>
+                  </div>
+                  <div>
+                  </div>
+                  <div class="field col-12 md:col-8">
+                      <label htmlFor="city">Evénement</label>
+                      <input pInputText id="evenement"  type="texte" formControlName="evenement" required autofocus [ngClass]="{'ng-invalid ng-dirty' :submitted && jourferieForm.get('evenement')?.hasError('required')}"/>
+                      <small class="ng-dirty ng-invalid" *ngIf="submitted && jourferieForm.get('evenement')?.hasError('required')">Evenement est requis.</small>
+                  </div>
+              </div>
+        </div>
+        <ng-template pTemplate="footer">
+          <button pButton pRipple label="Annuler" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+          <button pButton pRipple label="Enregistrer" icon="pi pi-check" class="p-button-text"
+            (click)="addJourferie()" type="submit"></button>
+        </ng-template>
+      </p-dialog>
+    </div>
+    <div *ngIf="jourferieDialogEdit">
+      <p-dialog [(visible)]="jourferieDialogEdit" [style]="{width: '500px',height:'600px'}" header="Modifier jour férié" [modal]="true"
+        class="p-fluid" [formGroup]="jourferieFormEdit">
+        <div class="card">
+          <div class="p-fluid p-formgrid grid">
+            <div class="field col-12 md:col-8">
+                <label htmlFor="lastname2">Date</label>
+                <p-calendar [showIcon]="true" id="date" formControlName="date" inputId="date" required autofocus [ngClass]="{'ng-invalid ng-dirty' :submitted && jourferieFormEdit.get('date')?.hasError('required')}"></p-calendar>
+                <small class="ng-dirty ng-invalid" *ngIf="jourferieFormEdit.get('date')?.hasError('required')">Date est requis.</small>
+            </div>
+            <div class="field col-12 md:col-8">
+                <label htmlFor="city">Evénement</label>
+                <input pInputText id="evenement" (change)="calculerDureeEdit()" type="text" formControlName="evenement" required autofocus [ngClass]="{'ng-invalid ng-dirty' :submitted && jourferieFormEdit.get('evenement')?.hasError('required')}"/>
+                <small class="ng-dirty ng-invalid" *ngIf="jourferieFormEdit.get('evenement')?.hasError('required')">Evenement est requis.</small>
+            </div>
+        </div>
+         </div>
+        <ng-template pTemplate="footer">
+          <button pButton pRipple label="Annuler" icon="pi pi-times" class="p-button-text"
+            (click)="hideDialogEdit()"></button>
+          <button pButton pRipple label="Enregistrer" icon="pi pi-check" class="p-button-text"
+            (click)="updateJourferie()" type="submit"></button>
+        </ng-template>
+      </p-dialog>
+    </div>
+    <div *ngIf="deletejourferieDialog">
+      <p-dialog [(visible)]="deletejourferieDialog" header="Confirmer" [modal]="true" [style]="{width:'450px'}">
+        <div class="flex align-items-center justify-content-center">
+          <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
+          <span *ngIf="jourferie">Êtes-vous sûr de vouloir supprimer <b>{{jourferie.id}}</b>?</span>
+        </div>
+        <ng-template pTemplate="footer">
+          <button pButton pRipple icon="pi pi-times" class="p-button-text" label="Non"
+            (click)="deletejourferieDialog = false"></button>
+          <button pButton pRipple icon="pi pi-check" class="p-button-text" label="Oui" (click)="confirmDelete()"></button>
+        </ng-template>
+      </p-dialog>
+    </div>
+
+  <div *ngIf="weekendSettingsDialog">
+      <p-dialog header="Paramétrage du week-end" [(visible)]="weekendSettingsDialog" [modal]="true" [style]="{width: '450px'}">
+        <div class="card">
+        <h5>Choisissez les jours du week-end :</h5>
+        <div class="p-field-checkbox">
+          <p-checkbox binary="true" label="Lundi" [(ngModel)]="includeLundi"></p-checkbox>
+          <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+          <p-checkbox binary="true" label="Mardi" [(ngModel)]="includeMardi"></p-checkbox>
+          <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+          <p-checkbox binary="true" label="Mercredi" [(ngModel)]="includeMercredi"></p-checkbox>
+          <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+          <p-checkbox binary="true" label="Jeudi" [(ngModel)]="includeJeudi"></p-checkbox>
+          <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+          <p-checkbox binary="true" label="Vendredi" [(ngModel)]="includeVendredi"></p-checkbox>
+          <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+          <p-checkbox binary="true" label="Samedi" [(ngModel)]="includeSamedi"></p-checkbox>
+          <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+          <p-checkbox binary="true" label="Dimanche" [(ngModel)]="includeDimanche"></p-checkbox>
+        </div>
+        </div>
+        <ng-template pTemplate="footer">
+          <button pButton pRipple label="Annuler" icon="pi pi-times" class="p-button-text" (click)="closeWeekendSettingsDialog()"></button>
+          <button pButton pRipple label="Enregistrer" icon="pi pi-check" class="p-button-text" (click)="saveWeekendSettings()"></button>
+        </ng-template>
+      </p-dialog>
+    </div>
+

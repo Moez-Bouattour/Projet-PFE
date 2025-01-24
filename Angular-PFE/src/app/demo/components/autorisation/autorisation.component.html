@@ -1,0 +1,295 @@
+<div class="card px-5 py-5">
+  <p-toast></p-toast>
+  <p-toolbar styleClass="mb-2">
+    <ng-template pTemplate="left">
+      <div class="my-2">
+        <button pButton pRipple label="Ajouter" icon="pi pi-plus" class="p-button-success mr-2"
+          (click)="openNew()"></button>
+      </div>
+      <div class="my-2">
+        <button pButton pRipple type="button" label="Voir solde" class="p-button-warning" (click)="openSoldeDialog()"></button>
+          </div>
+          <span>&nbsp;&nbsp;</span>
+        <div class="my-2">
+        <button *ngIf="isRH()" pButton pRipple label="Calendrier" icon="pi pi-calendar"
+        (click)="openCalendarDialog()">
+      </button>
+        </div>
+    </ng-template>
+  </p-toolbar>
+  <p-table #dt [value]="autorisations" responsiveLayout="scroll" [rows]="5" [globalFilterFields]="['users.name','raison','lastHistorique.Nom_etat','lastHistorique.Nom_Niveau']"
+    [paginator]="true" [rowsPerPageOptions]="[5,10,15]" [showCurrentPageReport]="true"
+    currentPageReportTemplate="Affichage de {first} à {last} des entrées {totalRecords}" [rowHover]="true">
+    <ng-template pTemplate="caption">
+      <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
+        <h5 class="m-0">Gère les demandes d'autorisation</h5>
+        <span class="block mt-5 md:mt-0 p-input-icon-left">
+          <i class="pi pi-search"></i>
+          <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Chercher..."
+            class="w-full sm:w-auto" />
+        </span>
+      </div>
+    </ng-template>
+    <ng-template pTemplate="header">
+      <tr>
+        <th pSortableColumn="id">Code<p-sortIcon field="id"></p-sortIcon></th>
+        <th pSortableColumn="users.name">Nom utilisateur<p-sortIcon field="name"></p-sortIcon></th>
+        <th pSortableColumn="Date_sortie">Date sortie <p-sortIcon field="Date_sortie"></p-sortIcon></th>
+        <th pSortableColumn="raison">Raison <p-sortIcon field="raison"></p-sortIcon></th>
+        <th pSortableColumn="Heure_debut">Heure début<p-sortIcon field="Date_debut"></p-sortIcon></th>
+        <th pSortableColumn="Heure_fin">Heure reprise <p-sortIcon field="Heure_fin"></p-sortIcon></th>
+        <th pSortableColumn="Duree">Durée <p-sortIcon field="Duree"></p-sortIcon></th>
+        <th pSortableColumn="solde">Solde <p-sortIcon field="solde"></p-sortIcon></th>
+        <th pSortableColumn="lastHistorique.Nom_Niveau">Nom niveau<p-sortIcon field="Nom_niveau"></p-sortIcon></th>
+        <th pSortableColumn="lastHistorique.Nom_etat">Nom état<p-sortIcon field="Nom_etat"></p-sortIcon></th>
+        <th>Action</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-autorisation>
+      <tr [style.background-color]="autorisation.lastHistorique.etats.couleur">
+        <td style="width:10%; min-width:8rem;"><span class="p-column-title">Code</span>
+          {{autorisation.id}}
+        </td>
+        <td style="width:14%; min-width:6rem;"><span class="p-column-title">Nom utilisateur</span>
+          {{autorisation.users.name}}
+        </td>
+        <td style="width:15%; min-width:9rem;">
+          <span class="p-column-title">Date sortie</span>
+          {{autorisation.Date_sortie}}
+        </td>
+        <td style="width:15%; min-width:9rem;">
+          <span class="p-column-title">Raison</span>
+          {{autorisation.raison}}
+        </td>
+        <td style="width:15%; min-width:9rem;">
+          <span class="p-column-title">Heure début</span>
+          {{formatTime(autorisation.Heure_debut)}}
+        </td>
+        <td style="width:15%; min-width:9rem;">
+          <span class="p-column-title">Heure reprise</span>
+          {{formatTime(autorisation.Heure_fin)}}
+        </td>
+        <td style="width:15%; min-width:9rem;">
+          <span class="p-column-title">Durée</span>
+          {{ formatDuree(autorisation.Duree) }}
+        </td>
+        <td style="width:14%; min-width:5rem;"><span class="p-column-title">Solde</span>
+          {{formatDuree(get(autorisation)) }}
+        </td>
+        <td style="width:14%; min-width:7rem;">
+          <button pButton pRipple type="button" [label]="autorisation.lastHistorique.Nom_Niveau"
+            class="p-button-secondary p-button-text"></button>
+        </td>
+        <td style="width:14%; min-width:8rem;">
+          <button pButton pRipple type="button" [label]="autorisation.lastHistorique.Nom_etat"
+            class="p-button-secondary p-button-text" (click)="openEtatDialog(autorisation.id)"></button>
+        </td>
+        <td>
+          <div *ngIf="autorisation.lastHistorique.Nom_Niveau==poste && autorisation.lastHistorique.Nom_etat=='en attente'" class="flex flex-wrap gap-2" >
+            <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2"
+              (click)="getAutorisation(autorisation.id)"></button>
+          </div>
+          <div *ngIf="autorisation.lastHistorique.Nom_Niveau =='RH' && autorisation.lastHistorique.Nom_etat == 'accepté'" class="flex flex-wrap gap-2">
+            <button pButton pRipple type="button" icon="pi pi-print" class=" p-button-rounded p-button-danger mr-2" (click)="imprimerDemande(autorisation)"></button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+<div *ngIf="autorisationDialogAdd">
+  <p-dialog [(visible)]="autorisationDialogAdd" [style]="{width: '850px',height:'650px'}" header="" [modal]="true"
+    class="p-fluid" [formGroup]="autorisationForm">
+    <p-header>
+      <div class="flex justify-content-between" style="align-items: center;">
+        <h4 >Ajouter demande d'autorisation</h4>
+        <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+        <p-button label="Solde autorisation : &nbsp;&nbsp; {{formatDuree(solde)}}" badge=""></p-button>
+      </div>
+    </p-header>
+    <div class="card">
+      <div class="p-fluid p-formgrid grid">
+        <div class="field col-12 md:col-6">
+          <label htmlFor="lastname2">Date sortie</label>
+          <p-calendar [showIcon]="true" id="Date_sortie" formControlName="Date_sortie" inputId="Date_sortie" required
+            autofocus
+            [ngClass]="{'ng-invalid ng-dirty' :submitted && autorisationForm.get('Date_sortie')?.hasError('required')}"></p-calendar>
+          <small class="ng-dirty ng-invalid"
+            *ngIf="submitted && autorisationForm.get('Date_sortie')?.hasError('required')">Date sortie est
+            requis.</small>
+        </div>
+        <div class="field col-12 md:col-6">
+          <label htmlFor="raison">Raison</label>
+          <br>
+          <textarea id="raison" pInputTextarea required rows="3" cols="45" required formControlName="raison" autofocus
+            [ngClass]="{'ng-invalid ng-dirty' :submitted && autorisationForm.get('raison')?.hasError('required')}"></textarea>
+          <small class="ng-dirty ng-invalid"
+            *ngIf="submitted && autorisationForm.get('raison')?.hasError('required')">Raison est requis.</small>
+        </div>
+        <div class="field col-12 md:col-4">
+          <label htmlFor="city">Heure début</label>
+          <input pInputText id="Heure_debut" (change)="calculerDuree()" type="time" formControlName="Heure_debut"
+            required autofocus
+            [ngClass]="{'ng-invalid ng-dirty' :submitted && autorisationForm.get('Heure_debut')?.hasError('required')}" />
+          <small class="ng-dirty ng-invalid"
+            *ngIf="submitted && autorisationForm.get('Heure_debut')?.hasError('required')">Heure début est
+            requis.</small>
+        </div>
+        <div class="field col-12 md:col-4">
+          <label htmlFor="city">Heure reprise</label>
+          <input pInputText id="Heure_fin" (change)="calculerDuree()" type="time" formControlName="Heure_fin" required
+            autofocus
+            [ngClass]="{'ng-invalid ng-dirty' :submitted && autorisationForm.get('Heure_fin')?.hasError('required')}" />
+          <small class="ng-dirty ng-invalid"
+            *ngIf="submitted && autorisationForm.get('Heure_fin')?.hasError('required')">Heure reprise est requis.</small>
+        </div>
+        <div class="field col-12 md:col-4">
+          <label htmlFor="state">Durée (heure(s))</label>
+          <input pInputText [value]="autorisationForm.controls.Duree.value" id="Duree" type="text" disabled />
+        </div>
+
+      </div>
+
+    </div>
+    <ng-template pTemplate="footer">
+      <button pButton pRipple label="Annuler" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+      <button pButton pRipple label="Enregistrer" icon="pi pi-check" class="p-button-text" (click)="addAutorisation()"
+        type="submit"></button>
+    </ng-template>
+    <div class="p-formgrid grid">
+      <div class="col-12 mb-2 lg:col-4 lg:mb-0">
+        <label htmlFor="Nom_Niveau">Nom niveau</label>
+        <input pInputText id="Nom_Niveau" [value]="autorisationForm.get('Nom_Niveau').value" disabled />
+      </div>
+      <div class="col-12 mb-2 lg:col-4 lg:mb-0">
+        <label htmlFor="Nom_etat">Nom état</label>
+        <input pInputText id="Nom_etat" [value]="autorisationForm.get('Nom_etat').value" disabled />
+      </div>
+    </div>
+  </p-dialog>
+</div>
+<div *ngIf="autorisationDialogEdit">
+  <p-dialog [(visible)]="autorisationDialogEdit" [style]="{width: '850px',height:'650px'}" header="" [modal]="true"
+    class="p-fluid" [formGroup]="autorisationFormEdit">
+    <p-header>
+    <div class="flex justify-content-between" style="align-items: center;">
+      <h4 class="p-m-0" style="margin: 0;">Modifier demande d'autorisation</h4>
+      <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+      <p-button label="Solde autorisation : &nbsp;&nbsp; {{formatDuree(solde)}}" badge=""></p-button>
+
+  </div>
+</p-header>
+    <div class="card">
+      <div class="p-fluid p-formgrid grid">
+        <div class="field col-12 md:col-6">
+            <label htmlFor="lastname2">Date de sortie</label>
+            <p-calendar [showIcon]="true" id="Date_sortie" formControlName="Date_sortie" inputId="Date_sortie" required autofocus [ngClass]="{'ng-invalid ng-dirty' :submitted && autorisationFormEdit.get('Date_sortie')?.hasError('required')}"></p-calendar>
+            <small class="ng-dirty ng-invalid" *ngIf="autorisationFormEdit.get('Date_sortie')?.hasError('required')">Date de  est requis.</small>
+        </div>
+        <div class="field col-12 md:col-6">
+          <label htmlFor="raison">Raison</label>
+          <br>
+          <textarea id="raison" pInputTextarea required rows="3" cols="45" required formControlName="raison" autofocus
+            [ngClass]="{'ng-invalid ng-dirty' :submitted && autorisationFormEdit.get('raison')?.hasError('required')}"></textarea>
+          <small class="ng-dirty ng-invalid"
+            *ngIf="submitted && autorisationFormEdit.get('raison')?.hasError('required')">Raison est requis.</small>
+        </div>
+        <div class="field col-12 md:col-4">
+            <label htmlFor="city">Heure début</label>
+            <input pInputText id="Heure_debut" (change)="calculerDureeEdit()" type="time" formControlName="Heure_debut" required autofocus [ngClass]="{'ng-invalid ng-dirty' :submitted && autorisationFormEdit.get('Heure_debut')?.hasError('required')}"/>
+            <small class="ng-dirty ng-invalid" *ngIf="autorisationFormEdit.get('Heure_debut')?.hasError('required')">Heure debut est requis.</small>
+        </div>
+        <div class="field col-12 md:col-4">
+            <label htmlFor="city">Heure reprise</label>
+            <input  pInputText id="Heure_fin" (change)="calculerDureeEdit()" type="time"  formControlName="Heure_fin"  required autofocus [ngClass]="{'ng-invalid ng-dirty' :submitted && autorisationFormEdit.get('Heure_fin')?.hasError('required')}" />
+            <small class="ng-dirty ng-invalid" *ngIf="autorisationFormEdit.get('Heure_fin')?.hasError('required')">Heure fin est requis.</small>
+        </div>
+        <div class="field col-12 md:col-4">
+            <label htmlFor="state">Durée (heure(s))</label>
+            <input pInputText  [value]="autorisationFormEdit.controls.duration.value"  id="Duree" type="text" disabled />
+        </div>
+    </div>
+     </div>
+    <ng-template pTemplate="footer">
+      <button pButton pRipple label="Annuler" icon="pi pi-times" class="p-button-text"
+        (click)="hideDialog()"></button>
+      <button pButton pRipple label="Enregistrer" icon="pi pi-check" class="p-button-text"
+        (click)="updateAutorisation()" type="submit"></button>
+    </ng-template>
+    <div class="p-formgrid grid">
+      <div class="col-12 mb-2 lg:col-4 lg:mb-0">
+        <label htmlFor="Nom_Niveau">Nom niveau</label>
+        <input pInputText id="Nom_Niveau" [value]="autorisationFormEdit.get('Nom_Niveau').value" disabled />
+      </div>
+      <div class="col-12 mb-2 lg:col-4 lg:mb-0">
+        <label htmlFor="Nom_etat">Nom état</label>
+        <input pInputText id="Nom_etat" [value]="autorisationFormEdit.get('Nom_etat').value" disabled />
+      </div>
+    </div>
+  </p-dialog>
+</div>
+<div *ngIf="etatDialog">
+  <p-dialog [(visible)]="etatDialog" [style]="{width: '450px','height': '500px'}" header="Modifier Etat" [modal]="true"
+    class="p-fluid">
+    <ng-template pTemplate="content">
+      <div class="field">
+        <label for="Nom_etat">Nom état</label>
+        <p-dropdown [(ngModel)]="selectedNomEtat" [options]="etats" placeholder="Sélectionner un etat"
+          [showClear]="true" optionLabel="Nom_etat" optionValue="Nom_etat"></p-dropdown>
+      </div>
+    </ng-template>
+    <ng-template pTemplate="footer">
+      <button pButton type="button" label="Annuler" icon="pi pi-times" class="p-button-text"
+        (click)="hideDialog()"></button>
+      <button pButton type="button" label="Enregistrer" icon="pi pi-check" class="p-button-text"
+        (click)="updateEtat()"></button>
+    </ng-template>
+  </p-dialog>
+</div>
+
+<div *ngIf="calendarDialogVisible">
+  <p-dialog header="Calendrier des demandes d'autorisation acceptées" [(visible)]="calendarDialogVisible" [modal]="true"
+    [style]="{ width: '1000px','height': '700px' }">
+    <full-calendar [options]="calendarOptions" [style]="{ width: '900px','height': '700px' }"></full-calendar>
+    <ng-template pTemplate="footer">
+      <button pButton pRipple type="button" label="Fermer" icon="pi pi-times" class="p-button-text"
+        (click)="closeCalendarDialog()"></button>
+    </ng-template>
+  </p-dialog>
+</div>
+
+<div *ngIf="eventDialogVisible">
+  <p-dialog header="Détails de la demande d'autorisation" [(visible)]="eventDialogVisible">
+    <ng-template pTemplate="content">
+      <div class="card">
+      <p><strong>Nom utilisateur: </strong> {{ selectedAutorisation.users.name }}</p>
+      <p><strong>Département utilisateur: </strong> {{ selectedAutorisation.users.departement }}</p>
+      <p><strong>Poste utilisateur:</strong> {{ selectedAutorisation.users.poste }}</p>
+      <p><strong>Date sortie:</strong> {{ selectedAutorisation.Date_sortie}}</p>
+      <p><strong>Durée:</strong> {{ formatDuree(selectedAutorisation.Duree)}}</p>
+      <p><strong>Raison:</strong> {{ selectedAutorisation.raison}}</p>
+      <p><strong>Heure début:</strong> {{ formatTime(selectedAutorisation.Heure_debut)}}</p>
+      <p><strong>Heure reprise:</strong> {{ formatTime(selectedAutorisation.Heure_fin)}}</p>
+      </div>
+    </ng-template>
+    <ng-template pTemplate="footer">
+      <button pButton pRipple type="button" label="Fermer" icon="pi pi-times" class="p-button-text"
+        (click)="closeeventDialog()"></button>
+    </ng-template>
+  </p-dialog>
+</div>
+
+<div *ngIf="VoirsoldeDialog">
+<p-dialog header="" [(visible)]="VoirsoldeDialog" [modal]="true" [style]="{width: '500px','height': '520px'}">
+  <h5> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Solde autorisation du mois {{mois}} de l'année 2025</h5>
+  <div class="flex justify-content-center">
+    <p-chart type="pie" [data]="data" [options]="options"></p-chart>
+  </div>
+  <ng-template pTemplate="footer">
+    <button pButton pRipple type="button" label="Fermer" icon="pi pi-times" class="p-button-text"
+      (click)="closevoirsoldeDialog()"></button>
+  </ng-template>
+
+</p-dialog>
+</div>
+

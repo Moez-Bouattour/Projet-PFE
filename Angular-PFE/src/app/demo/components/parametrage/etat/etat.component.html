@@ -1,0 +1,129 @@
+<br>
+  <div class="card px-4 py-4">
+    <p-toast></p-toast>
+    <p-toolbar styleClass="mb-2">
+      <ng-template pTemplate="left">
+        <div class="my-2">
+          <button pButton pRipple label="Ajouter" icon="pi pi-plus" class="p-button-success mr-2"
+            (click)="openNew()"></button>
+        </div>
+      </ng-template>
+    </p-toolbar>
+    <p-table #dt [value]="etats" responsiveLayout="scroll" [rows]="5"
+      [globalFilterFields]="['Nom_etat']" [paginator]="true" [rowsPerPageOptions]="[5,10,15]"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="Affichage de {first} à {last} des entrées {totalRecords}" [rowHover]="true">
+      <ng-template pTemplate="caption">
+        <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
+          <h5 class="m-0">
+            Gérer les états de niveau : {{ niveauSelected?.Nom_Niveau }}
+          </h5>
+          <span class="block mt-2 md:mt-0 p-input-icon-left">
+            <i class="pi pi-search"></i>
+            <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Chercher..."
+              class="w-full sm:w-auto" />
+          </span>
+        </div>
+      </ng-template>
+      <ng-template pTemplate="header">
+        <tr>
+          <th pSortableColumn="id_etat">Code <p-sortIcon field="id_etat"></p-sortIcon></th>
+          <th pSortableColumn="Nom_etat">Nom état<p-sortIcon field="Nom_etat"></p-sortIcon></th>
+          <th>Action</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-etat>
+        <tr>
+          <td style="width:14%; min-width:5rem;"><span class="p-column-title">Code</span>
+            {{etat.id}}
+          </td>
+          <td style="width:14%; min-width:9rem;">
+            <span class="p-column-title">Nom état</span>
+            {{etat.Nom_etat}}
+          </td>
+
+          <td>
+            <div class="flex">
+              <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2"
+                (click)="getEtat(etat.id)"></button>
+              <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-warning"
+                (click)="deleteEtat(etat)"></button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+    <div *ngIf="etatDialogue">
+      <p-dialog [(visible)]="etatDialogue" [style]="{width: '450px','height': '450px'}" header="Ajouter État" [modal]="true"
+        class="p-fluid">
+        <ng-template pTemplate="content">
+         <div class="formgrid grid">
+          <div class="col-12 md:col-12">
+            <div class="field">
+              <label for="Nom_etat">Nom état</label>
+              <input pInputText type="text" id="Nom_etat" [(ngModel)]="etat.Nom_etat">
+            </div>
+            <div class="field-checkbox">
+              <p-checkbox name="validation" binary="true" [(ngModel)]="validation" id="validation"></p-checkbox>
+              <label for="validation">Validation</label>
+          </div>
+          <div class="field">
+            <label for="couleur">Couleur </label>
+            <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+          <p-colorPicker [(ngModel)]="etat.couleur"></p-colorPicker>
+          </div>
+        </div>
+          </div>
+        </ng-template>
+        <ng-template pTemplate="footer">
+          <button pButton pRipple label="Annuler" icon="pi pi-times" class="p-button-text"
+            (click)="hideDialog()"></button>
+          <button pButton pRipple label="Enregistrer" icon="pi pi-check" class="p-button-text"
+            (click)="addEtat()"></button>
+        </ng-template>
+      </p-dialog>
+    </div>
+    <div *ngIf="etatDialogEdit">
+      <p-dialog [(visible)]="etatDialogEdit" [style]="{width: '450px','height': '450px'}" header="Modifier État " [modal]="true"
+        class="p-fluid">
+        <ng-template pTemplate="content">
+          <div class="formgrid grid">
+            <div class="col-12 md:col-12">
+            <div class="field">
+              <label for="Nom_etat">Nom état</label>
+              <input pInputText type="text" id="Nom_etat" [(ngModel)]="etat.Nom_etat">
+            </div>
+            <div class="field-checkbox">
+              <p-checkbox name="validation" binary="true" [(ngModel)]="validation" id="validation"></p-checkbox>
+              <label for="validation">Validation</label>
+          </div>
+          <div class="field">
+            <label for="couleur">Couleur </label>
+            <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+            <p-colorPicker [(ngModel)]="etat.couleur"></p-colorPicker>
+          </div>
+            </div>
+          </div>
+        </ng-template>
+        <ng-template pTemplate="footer">
+          <button pButton pRipple label="Annuler" icon="pi pi-times" class="p-button-text"
+            (click)="hideDialogEdit()"></button>
+          <button pButton pRipple label="Enregistrer" icon="pi pi-check" class="p-button-text"
+            (click)="updateEtat()"></button>
+        </ng-template>
+      </p-dialog>
+    </div>
+  </div>
+<div *ngIf="deleteEtatDialog">
+  <p-dialog [(visible)]="deleteEtatDialog" header="Confirmer" [modal]="true" [style]="{width:'450px'}">
+    <div class="flex align-items-center justify-content-center">
+      <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
+      <span *ngIf="etat">Êtes-vous sûr de vouloir supprimer <b>{{etat.id}}</b>?</span>
+    </div>
+    <ng-template pTemplate="footer">
+      <button pButton pRipple icon="pi pi-times" class="p-button-text" label="Non"
+        (click)="deleteEtatDialog = false"></button>
+      <button pButton pRipple icon="pi pi-check" class="p-button-text" label="Oui" (click)="confirmDelete()"></button>
+    </ng-template>
+  </p-dialog>
+</div>

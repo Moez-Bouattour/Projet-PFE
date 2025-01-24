@@ -1,0 +1,147 @@
+<div class="grid">
+  <div class="col-12 xl:col-6">
+    <div class="card px-5 py-5">
+      <p-toast></p-toast>
+      <p-toolbar styleClass="mb-2">
+        <ng-template pTemplate="left">
+        <button pButton pRipple type="button" icon="pi pi-cog" label="Heure repas" class="p-button-help" (click)="openRepasSettingsDialog()"></button>
+      </ng-template>
+      </p-toolbar>
+      <p-table #dt [value]="users" responsiveLayout="scroll" [rows]="5" [paginator]="true"
+        [rowsPerPageOptions]="[5,10,15]" [showCurrentPageReport]="true" [globalFilterFields]="['user.name']"
+        currentPageReportTemplate="Affichage de {first} à {last} des entrées {totalRecords}" [rowHover]="true">
+        <ng-template pTemplate="caption">
+          <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
+            <h5 class="m-0">Liste des employés</h5>
+            <span class="block mt-5 md:mt-0 p-input-icon-left">
+              <i class="pi pi-search"></i>
+              <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Chercher..."
+                class="w-full sm:w-auto" />
+            </span>
+          </div>
+        </ng-template>
+        <ng-template pTemplate="header">
+          <tr>
+            <th pSortableColumn="user.id">Code<p-sortIcon field="user.id"></p-sortIcon></th>
+            <th pSortableColumn="user.name">Nom & Prénom<p-sortIcon field="user.name"></p-sortIcon></th>
+            <th pSortableColumn="user.sexe">Genre<p-sortIcon field="user.sexe"></p-sortIcon></th>
+            <th pSortableColumn="user.situation">Situation<p-sortIcon field="user.situation"></p-sortIcon></th>
+            <th pSortableColumn="user.date_embauche">Date d'embauche<p-sortIcon field="user.date_embauche"></p-sortIcon>
+            </th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-user>
+          <tr [ngStyle]="{'background-color': (user === userSelected && soldeDialog) ? '#FBFADA' : 'inherit'}">
+            <td (click)="onChildUser(user)" style="width:14%; min-width:5rem;"><span class="p-column-title">Code</span>
+              {{user.user.id}}
+            </td>
+            <td (click)="onChildUser(user)" style="width:14%; min-width:9rem;"><span class="p-column-title">Nom &
+                Prénom</span>
+              {{user.user.name}}
+            </td>
+            <td (click)="onChildUser(user)" style="width:14%; min-width:6rem;"><span class="p-column-title">Genre</span>
+              {{user.user.sexe}}
+            </td>
+            <td (click)="onChildUser(user)" style="width:14%; min-width:6rem;"><span
+                class="p-column-title">Situation</span>
+              {{user.user.situation}}
+            </td>
+            <td (click)="onChildUser(user)" style="width:14%; min-width:8rem;"><span class="p-column-title">Date
+                d'embauche</span>
+              {{user.user.date_embauche}}
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
+  <div class="col-12 xl:col-6">
+
+    <div *ngIf="soldeDialog">
+      <div class="card px-4 py-4">
+        <p-toolbar styleClass="mb-2">
+          <ng-template pTemplate="left">
+            <div class="my-2">
+              <button pButton pRipple label="Ajouter" icon="pi pi-plus" class="p-button-success mr-2"
+                (click)="openNew()"></button>
+            </div>
+          </ng-template>
+        </p-toolbar>
+        <p-table #dt [value]="soldes" responsiveLayout="scroll" [rows]="5" [paginator]="true"
+          [rowsPerPageOptions]="[5,10,15]" [showCurrentPageReport]="true" [globalFilterFields]="['solde']"
+          currentPageReportTemplate="Affichage de {first} à {last} des entrées {totalRecords}" [rowHover]="true">
+          <ng-template pTemplate="caption">
+            <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
+              <h5 class="m-0">Le solde d'autorisation de {{name}} de l'année actuelle du mois {{mois}} </h5>
+            </div>
+          </ng-template>
+          <ng-template pTemplate="header">
+            <tr>
+              <th pSortableColumn="solde">Solde<p-sortIcon field="solde"></p-sortIcon></th>
+              <th pSortableColumn="autorisation_pris">Autorisation pris <p-sortIcon field="autorisation_pris"></p-sortIcon></th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-solde>
+            <tr>
+              <td  style="width:14%; min-width:8rem;">
+                <span class="p-column-title">Solde</span>
+                {{formatDuree(solde.solde)}}
+              </td>
+              <td  style="width:14%; min-width:8rem;">
+                <span class="p-column-title">Autorisation pris</span>
+                {{formatDuree(solde.autorisation_pris)}}
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+    </div>
+  </div>
+  </div>
+<div *ngIf="soldeDialogueAdd">
+    <p-dialog [(visible)]="soldeDialogueAdd" [style]="{width: '450px'}" header="Ajouter solde d'autorisation" [modal]="true"
+      class="p-fluid">
+      <ng-template pTemplate="content">
+        <div class="field">
+          <label for="annee">Solde</label>
+          <input type="text" pInputText id="solde" [(ngModel)]="solde.solde" required autofocus
+            [ngClass]="{'ng-invalid ng-dirty' :submitted && !solde.solde}" />
+          <small class="ng-dirty ng-invalid" *ngIf="submitted && !solde.solde">Solde est requis.</small>
+        </div>
+        <div class="field">
+          <label for="duree">Durée</label>
+          <input type="text" pInputText id="solde" [(ngModel)]="solde.duree" required autofocus
+            [ngClass]="{'ng-invalid ng-dirty' :submitted && !solde.duree}" disabled/>
+          <small class="ng-dirty ng-invalid" *ngIf="submitted && !solde.duree">Durée est requis.</small>
+        </div>
+      </ng-template>
+      <ng-template pTemplate="footer">
+        <button pButton pRipple label="Annuler" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+        <button pButton pRipple label="Enregistrer" icon="pi pi-check" class="p-button-text"
+          (click)="addSolde()"></button>
+      </ng-template>
+    </p-dialog>
+  </div>
+
+  <div *ngIf="repasSettingsDialog">
+    <p-dialog header="Paramétrage l'heure de repas" [(visible)]="repasSettingsDialog" [modal]="true" [style]="{width: '450px'}">
+      <div class="card">
+      <h5>Choisissez les heures de début et de fin :</h5>
+        <div class="p-fluid p-formgrid grid">
+            <div class="field col-12 md:col-4">
+                <label htmlFor="city">Heure début</label>
+                <input pInputText id="heure_debut" type="time" Name="heure_debut" [(ngModel)]="heureDebut"/>
+            </div>
+            <div class="field col-12 md:col-4">
+                <label htmlFor="city">Heure fin</label>
+                <input  pInputText id="heure_fin" type="time"  Name="heure_fin" [(ngModel)]="heureFin" />
+            </div>
+        </div>
+      </div>
+      <ng-template pTemplate="footer">
+        <button pButton pRipple label="Annuler" icon="pi pi-times" class="p-button-text" (click)="closeRepasSettingsDialog()"></button>
+        <button pButton pRipple label="Enregistrer" icon="pi pi-check" class="p-button-text" (click)="saveRepasSettings()"></button>
+      </ng-template>
+    </p-dialog>
+  </div>
+

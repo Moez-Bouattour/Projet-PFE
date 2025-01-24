@@ -1,0 +1,121 @@
+
+<div class="card px-4 py-4">
+  <p-toast></p-toast>
+  <p-toolbar styleClass="mb-2">
+    <ng-template pTemplate="left">
+      <div class="my-2">
+        <button pButton pRipple label="Ajouter" icon="pi pi-plus" class="p-button-success mr-2"
+          (click)="openNew()"></button>
+      </div>
+    </ng-template>
+  </p-toolbar>
+  <p-table #dt [value]="villes" responsiveLayout="scroll" [rows]="5"
+    [globalFilterFields]="['nom_ville','codePostal']" [paginator]="true" [rowsPerPageOptions]="[5,10,15]"
+    [showCurrentPageReport]="true"
+    currentPageReportTemplate="Affichage de {first} à {last} des entrées {totalRecords}" [rowHover]="true">
+    <ng-template pTemplate="caption">
+      <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
+        <h5 class="m-0">
+          Gère les villes
+        </h5>
+        <span class="block mt-2 md:mt-0 p-input-icon-left">
+          <i class="pi pi-search"></i>
+          <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Chercher..."
+            class="w-full sm:w-auto" />
+        </span>
+      </div>
+    </ng-template>
+    <ng-template pTemplate="header">
+      <tr>
+        <th pSortableColumn="id">Code<p-sortIcon field="id"></p-sortIcon></th>
+        <th pSortableColumn="nom_ville">Nom ville<p-sortIcon field="nom_ville"></p-sortIcon></th>
+        <th pSortableColumn="codePostal">Code postal<p-sortIcon field="codePostal"></p-sortIcon></th>
+        <th>Action</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-ville>
+      <tr>
+        <td style="width:14%; min-width:5rem;"><span class="p-column-title">Code</span>
+          {{ville.id}}
+        </td>
+        <td style="width:14%; min-width:9rem;">
+          <span class="p-column-title">Nom ville</span>
+          {{ville.nom_ville}}
+        </td>
+        <td style="width:14%; min-width:9rem;">
+          <span class="p-column-title">Code postal</span>
+          {{ville.codePostal}}
+        </td>
+        <td>
+          <div class="flex">
+            <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2"
+              (click)="getVille(ville.id)"></button>
+            <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-warning"
+              (click)="deleteVille(ville)"></button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+  <div *ngIf="villeDialogue">
+    <p-dialog [(visible)]="villeDialogue" [style]="{width: '500px',height:'650px'}" header="Ajouter ville" [modal]="true"
+      class="p-fluid" [formGroup]="villeForm" >
+        <div class="card">
+            <div class="p-fluid p-formgrid grid">
+              <div class="field col-12 md:col-8">
+                <label htmlFor="city">Nom ville</label>
+                <input pInputText id="nom_ville"  type="texte" formControlName="nom_ville" required autofocus [ngClass]="{'ng-invalid ng-dirty' :submitted && villeForm.get('nom_ville')?.hasError('required')}"/>
+                <small class="ng-dirty ng-invalid" *ngIf="submitted && villeForm.get('nom_ville')?.hasError('required')">Nom ville est requis.</small>
+                </div>
+                <div class="field col-12 md:col-8">
+                  <label htmlFor="city">Code postal</label>
+                  <input pInputText id="codePostal"  type="texte" formControlName="codePostal" required autofocus [ngClass]="{'ng-invalid ng-dirty' :submitted && villeForm.get('codePostal')?.hasError('required')}"/>
+                  <small class="ng-dirty ng-invalid" *ngIf="submitted && villeForm.get('codePostal')?.hasError('required')">Code postal est requis.</small>
+                  </div>
+            </div>
+      </div>
+      <ng-template pTemplate="footer">
+        <button pButton pRipple label="Annuler" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+        <button pButton pRipple label="Enregistrer" icon="pi pi-check" class="p-button-text"
+          (click)="addVille()" type="submit"></button>
+      </ng-template>
+    </p-dialog>
+  </div>
+  <div *ngIf="villeDialogEdit">
+    <p-dialog [(visible)]="villeDialogEdit" [style]="{width: '500px',height:'650px'}" header="Modifier ville" [modal]="true"
+      class="p-fluid" [formGroup]="villeFormEdit">
+      <div class="card">
+        <div class="p-fluid p-formgrid grid">
+          <div class="field col-12 md:col-8">
+            <label htmlFor="city">Nom ville</label>
+            <input pInputText id="nom_ville" type="text" formControlName="nom_ville" required autofocus [ngClass]="{'ng-invalid ng-dirty' :submitted && villeFormEdit.get('nom_ville')?.hasError('required')}"/>
+            <small class="ng-dirty ng-invalid" *ngIf="villeFormEdit.get('nom_ville')?.hasError('required')">Nom ville est requis.</small>
+        </div>
+        <div class="field col-12 md:col-8">
+          <label htmlFor="city">Code postal</label>
+          <input pInputText id="codePostal" type="text" formControlName="codePostal" required autofocus [ngClass]="{'ng-invalid ng-dirty' :submitted && villeFormEdit.get('codePostal')?.hasError('required')}"/>
+          <small class="ng-dirty ng-invalid" *ngIf="villeFormEdit.get('codePostal')?.hasError('required')">Nom ville est requis.</small>
+      </div>
+      </div>
+       </div>
+      <ng-template pTemplate="footer">
+        <button pButton pRipple label="Annuler" icon="pi pi-times" class="p-button-text"
+          (click)="hideDialogEdit()"></button>
+        <button pButton pRipple label="Enregistrer" icon="pi pi-check" class="p-button-text"
+          (click)="updateVille()" type="submit"></button>
+      </ng-template>
+    </p-dialog>
+  </div>
+<div *ngIf="deleteVilleDialog">
+<p-dialog [(visible)]="deleteVilleDialog" header="Confirmer" [modal]="true" [style]="{width:'450px'}">
+  <div class="flex align-items-center justify-content-center">
+    <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
+    <span *ngIf="ville">Êtes-vous sûr de vouloir supprimer <b>{{ville.nom_ville}}</b>?</span>
+  </div>
+  <ng-template pTemplate="footer">
+    <button pButton pRipple icon="pi pi-times" class="p-button-text" label="Non"
+      (click)="deleteVilleDialog = false"></button>
+    <button pButton pRipple icon="pi pi-check" class="p-button-text" label="Oui" (click)="confirmDelete()"></button>
+  </ng-template>
+</p-dialog>
+</div>
